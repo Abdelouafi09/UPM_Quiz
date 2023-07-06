@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome, [Student Name]!</h1>
+    </header>
+    
+    <div class="content">
+        <h2>Available Quizzes</h2>
+        <ul class="quiz-list">
+            <li>
+                <a href="#">Quiz 1</a>
+                <p>Description of Quiz 1</p>
+            </li>
+            <li>
+                <a href="#">Quiz 2</a>
+                <p>Description of Quiz 2</p>
+            </li>
+            <!-- Add more quizzes dynamically -->
+        </ul>
+    </div>
+
+    <footer>
+        <p>Quiz Web App &copy; 2023. All rights reserved.</p>
+    </footer>
+</body>
+</html>

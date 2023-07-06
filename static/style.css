@@ -1,0 +1,86 @@
+/* Reset default styles */
+body, h1, h2, h3, p, ul, nav, a {
+    margin: 0;
+    padding: 0;
+}
+
+/* Main styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header {
+    background-color: #007bff;
+    padding: 20px;
+    color: #fff;
+}
+
+header h1 {
+    margin-bottom: 10px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav ul li {
+    margin-right: 10px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+.content {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin-top: 20px;
+}
+
+.quiz-list {
+    list-style: none;
+}
+
+.quiz-list li {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.quiz-list li a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.quiz-list li p {
+    margin-top: 5px;
+    color: #666;
+}
+
+footer {
+    background-color: #007bff;
+    padding: 10px;
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+}

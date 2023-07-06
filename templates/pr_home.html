@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Professor Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome, [Professor Name]!</h1>
+        <nav>
+            <ul>
+                <li><a href="/professor/home">Home</a></li>
+                <li><a href="/quiz/create">Create Quiz</a></li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="content">
+        <h2>My Quizzes</h2>
+        <h3>Expired Quizzes</h3>
+        <ul class="quiz-list">
+            {% for quiz in expired_quizzes %}
+            <li>
+                <a href="/quiz/{{ quiz.quiz_id }}">{{ quiz.title }}</a>
+                <p>{{ quiz.description }}</p>
+            </li>
+            {% endfor %}
+            <li><a href="/view-more-expired">View More</a></li>
+        </ul>
+        
+        <h3>Current Quizzes</h3>
+        <ul class="quiz-list">
+            {% for quiz in current_quizzes %}
+            <li>
+                <a href="/quiz/{{ quiz.quiz_id }}">{{ quiz.title }}</a>
+                <p>{{ quiz.description }}</p>
+            </li>
+            {% endfor %}
+            <li><a href="/view-more-current">View More</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>UPM Quiz &copy; 2023. All rights reserved.</p>
+    </footer>
+</body>
+</html>
