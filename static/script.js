@@ -1,95 +1,65 @@
-// Function to add an option field for a question
-function addOption(optionContainer) {
-  var optionCount = optionContainer.children.length + 1;
+// Add option functionality
+        var questionSection = document.getElementById('question-section');
+        var addQuestionBtn = document.getElementById('add-question');
+        var questionCount = 1;
 
-  var optionDiv = document.createElement('div');
-  optionDiv.className = 'option';
+        addQuestionBtn.addEventListener('click', function() {
+            questionCount++;
+            var newQuestion = document.createElement('div');
+            newQuestion.classList.add('question');
 
-  var optionInput = document.createElement('input');
-  optionInput.type = 'text';
-  optionInput.name = 'option' + optionContainer.dataset.questionId;
-  optionInput.required = true;
+            var questionLabel = document.createElement('label');
+            questionLabel.textContent = 'Question:';
+            var questionInput = document.createElement('input');
+            questionInput.type = 'text';
+            questionInput.name = 'question[]';
+            questionInput.required = true;
 
-  var removeOptionButton = document.createElement('button');
-  removeOptionButton.type = 'button';
-  removeOptionButton.className = 'remove-option-btn';
-  removeOptionButton.textContent = 'Remove Option';
-  removeOptionButton.addEventListener('click', function () {
-    optionContainer.removeChild(optionDiv);
-  });
+            var option1Label = document.createElement('label');
+            option1Label.textContent = 'Option 1:';
+            var option1Input = document.createElement('input');
+            option1Input.type = 'text';
+            option1Input.name = 'option-' + questionCount + '[]';
+            option1Input.required = true;
 
-  optionDiv.appendChild(optionInput);
-  optionDiv.appendChild(removeOptionButton);
+            var option2Label = document.createElement('label');
+            option2Label.textContent = 'Option 2:';
+            var option2Input = document.createElement('input');
+            option2Input.type = 'text';
+            option2Input.name = 'option-' + questionCount + '[]';
+            option2Input.required = true;
 
-  optionContainer.appendChild(optionDiv);
-}
+            var addOptionBtn = document.createElement('button');
+            addOptionBtn.type = 'button';
+            addOptionBtn.classList.add('add-option');
+            addOptionBtn.textContent = 'Add Option';
 
-// Function to add a new question section
-function addQuestion() {
-  var questionsContainer = document.getElementById('questions-container');
-  var questionCount = questionsContainer.children.length + 1;
+            newQuestion.appendChild(questionLabel);
+            newQuestion.appendChild(questionInput);
+            newQuestion.appendChild(option1Label);
+            newQuestion.appendChild(option1Input);
+            newQuestion.appendChild(option2Label);
+            newQuestion.appendChild(option2Input);
+            newQuestion.appendChild(addOptionBtn);
 
-  var questionDiv = document.createElement('div');
-  questionDiv.className = 'question';
+            questionSection.appendChild(newQuestion);
+        });
 
-  var questionLabel = document.createElement('label');
-  questionLabel.textContent = 'Question ' + questionCount + ':';
+        // Add option functionality
+        questionSection.addEventListener('click', function(event) {
+            if (event.target.classList.contains('add-option')) {
+                var questionDiv = event.target.parentElement;
 
-  var questionInput = document.createElement('input');
-  questionInput.type = 'text';
-  questionInput.name = 'question' + questionCount;
-  questionInput.required = true;
+                var optionCount = questionDiv.querySelectorAll('input[name^="option-"]').length + 1;
 
-  var typeLabel = document.createElement('label');
-  typeLabel.textContent = 'Question Type:';
+                var optionLabel = document.createElement('label');
+                optionLabel.textContent = 'Option ' + optionCount + ':';
+                var optionInput = document.createElement('input');
+                optionInput.type = 'text';
+                optionInput.name = 'option-' + questionCount + '[]';
+                optionInput.required = true;
 
-  var typeSelect = document.createElement('select');
-  typeSelect.name = 'type' + questionCount;
-
-  var multipleChoiceOption = document.createElement('option');
-  multipleChoiceOption.value = 'multiple-choice';
-  multipleChoiceOption.textContent = 'Multiple Choice';
-
-  var shortAnswerOption = document.createElement('option');
-  shortAnswerOption.value = 'short-answer';
-  shortAnswerOption.textContent = 'Short Answer';
-
-  typeSelect.appendChild(multipleChoiceOption);
-  typeSelect.appendChild(shortAnswerOption);
-
-  var optionsContainer = document.createElement('div');
-  optionsContainer.className = 'options';
-  optionsContainer.dataset.questionId = questionCount;
-
-  var optionLabel = document.createElement('label');
-  optionLabel.textContent = 'Options:';
-
-  var optionInput = document.createElement('input');
-  optionInput.type = 'text';
-  optionInput.name = 'option' + questionCount;
-  optionInput.required = true;
-
-  var addOptionButton = document.createElement('button');
-  addOptionButton.type = 'button';
-  addOptionButton.className = 'add-option-btn';
-  addOptionButton.textContent = 'Add Option';
-  addOptionButton.addEventListener('click', function () {
-    addOption(optionsContainer);
-  });
-
-  optionsContainer.appendChild(optionLabel);
-  optionsContainer.appendChild(optionInput);
-  optionsContainer.appendChild(addOptionButton);
-
-  questionDiv.appendChild(questionLabel);
-  questionDiv.appendChild(questionInput);
-  questionDiv.appendChild(typeLabel);
-  questionDiv.appendChild(typeSelect);
-  questionDiv.appendChild(optionsContainer);
-
-  questionsContainer.appendChild(questionDiv);
-}
-
-// Event listener to add question on button click
-var addQuestionButton = document.getElementById('add-question-btn');
-addQuestionButton.addEventListener('click', addQuestion);
+                questionDiv.insertBefore(optionLabel, event.target);
+                questionDiv.insertBefore(optionInput, event.target);
+            }
+        });
