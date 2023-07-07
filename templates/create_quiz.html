@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Create Quiz</h1>
+        <nav>
+            <ul>
+                <li><a href="/professor/home">Home</a></li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="content">
+        <form action="/quiz/save" method="POST">
+            <label for="quiz-title">Quiz Title:</label>
+            <input type="text" id="quiz-title" name="quiz_title" required>
+            
+            <label for="quiz-description">Quiz Description:</label>
+            <textarea id="quiz-description" name="quiz_description" required></textarea>
+            
+            <h2>Questions</h2>
+            <div id="question-section">
+                <div class="question">
+                    <label for="question-1">Question:</label>
+                    <input type="text" id="question-1" name="question[]" required>
+                    
+                    <label for="option-1">Option 1:</label>
+                    <input type="text" id="option-1" name="option-1[]" required>
+                    
+                    <label for="option-2">Option 2:</label>
+                    <input type="text" id="option-2" name="option-2[]" required>
+                    
+                    <button type="button" class="add-option">Add Option</button>
+                </div>
+            </div>
+            
+            <button type="button" id="add-question">Add Question</button>
+            <button type="submit">Next</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>UPM Quiz &copy; 2023. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Add option functionality
+        var questionSection = document.getElementById('question-section');
+        var addQuestionBtn = document.getElementById('add-question');
+        var questionCount = 1;
+
+        addQuestionBtn.addEventListener('click', function() {
+            questionCount++;
+            var newQuestion = document.createElement('div');
+            newQuestion.classList.add('question');
+
+            var questionLabel = document.createElement('label');
+            questionLabel.textContent = 'Question:';
+            var questionInput = document.createElement('input');
+            questionInput.type = 'text';
+            questionInput.name = 'question[]';
+            questionInput.required = true;
+
+            var option1Label = document.createElement('label');
+            option1Label.textContent = 'Option 1:';
+            var option1Input = document.createElement('input');
+            option1Input.type = 'text';
+            option1Input.name = 'option-' + questionCount + '[]';
+            option1Input.required = true;
+
+            var option2Label = document.createElement('label');
+            option2Label.textContent = 'Option 2:';
+            var option2Input = document.createElement('input');
+            option2Input.type = 'text';
+            option2Input.name = 'option-' + questionCount + '[]';
+            option2Input.required = true;
+
+            var addOptionBtn = document.createElement('button');
+            addOptionBtn.type = 'button';
+            addOptionBtn.classList.add('add-option');
+            addOptionBtn.textContent = 'Add Option';
+
+            newQuestion.appendChild(questionLabel);
+            newQuestion.appendChild(questionInput);
+            newQuestion.appendChild(option1Label);
+            newQuestion.appendChild(option1Input);
+            newQuestion.appendChild(option2Label);
+            newQuestion.appendChild(option2Input);
+            newQuestion.appendChild(addOptionBtn);
+
+            questionSection.appendChild(newQuestion);
+        });
+
+        // Add option functionality
+        questionSection.addEventListener('click', function(event) {
+            if (event.target.classList.contains('add-option')) {
+                var questionDiv = event.target.parentElement;
+
+                var optionCount = questionDiv.querySelectorAll('input[name^="option-"]').length + 1;
+
+                var optionLabel = document.createElement('label');
+                optionLabel.textContent = 'Option ' + optionCount + ':';
+                var optionInput = document.createElement('input');
+                optionInput.type = 'text';
+                optionInput.name = 'option-' + questionCount + '[]';
+                optionInput.required = true;
+
+                questionDiv.insertBefore(optionLabel, event.target);
+                questionDiv.insertBefore(optionInput, event.target);
+            }
+        });
+    </script>
+</body>
+</html>
