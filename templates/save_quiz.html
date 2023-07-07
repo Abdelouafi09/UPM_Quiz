@@ -21,6 +21,7 @@ body {
 
 header h1 {
     margin-bottom: 10px;
+  
 }
 
 
@@ -37,9 +38,15 @@ header h1 {
 
 h2 {
     margin-bottom: 10px;
+  
+}
+.quiz_detail{
+  text-align: center;
 }
 
-
+    .quiz_detail h4{
+  margin-top: 3rem;
+}
 form label {
     display: block;
     margin-bottom: 5px;
@@ -93,12 +100,13 @@ form button:hover {
 </head>
 <body>
     <header>
-        <h1>Quiz Details</h1>
-       {% include 'nav.html' %}
+      {% include 'nav.html' %}
     </header>
     
     <div class="content">
-        <h2>Quiz Details</h2>
+      <div class='quiz_detail'>
+            <h2>More Details</h2>
+            </div>
         <form action="/quiz/save_details" method="POST">
             <label for="subject">Subject:</label>
             <input type="text" id="subject" name="subject" required>
@@ -111,12 +119,13 @@ form button:hover {
             
             <label for="timer">Quiz Timer (minutes):</label>
             <input type="number" id="timer" name="timer" min="1" required>
-            
-            <h2>Questions</h2>
-
+            <div class='quiz_detail'>
+            <h4>Correcte answers</h4>
+              <hr>
+            </div>
 {% for question in questions %}
     <div class="question">
-        <h3>Q{{ loop.index }}</h3>
+        <h5>Q{{ loop.index }}</h5>
         <p style='margin: 10px;'>{{ question.text }}</p>
 
                 </select>
