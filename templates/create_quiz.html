@@ -35,18 +35,6 @@
                 <div class="question">
                     <label for="question-1">Question:</label>
                     <input type="text" id="question-1" name="question[]" required>
-                    <div class="container">
-	<div>
-		<label>
-			<input type="radio" name="radio" value='multi' checked>
-			<span>Multiple answers</span>
-		</label>
-		<label>
-			<input type="radio" name="radio" value='single'>
-			<span>Single answers</span>
-		</label>
-	</div>
-</div>
 
                     <label for="option-1">Option 1:</label>
                     <input type="text" id="option-1" name="option-1[]" required>
@@ -68,7 +56,7 @@
     </footer>
 
     <script>
-        // Add option functionality
+// Add option functionality
 var questionSection = document.getElementById('question-section');
 var addQuestionBtn = document.getElementById('add-question');
 var questionCount = 1;
@@ -84,27 +72,6 @@ addQuestionBtn.addEventListener('click', function() {
     questionInput.type = 'text';
     questionInput.name = 'question[]';
     questionInput.required = true;
-
-    var questionTypeLabel = document.createElement('label');
-    questionTypeLabel.textContent = 'Question Type:';
-    var questionTypeSingle = document.createElement('input');
-    questionTypeSingle.type = 'radio';
-    questionTypeSingle.id = 'question-type-single-' + questionCount;
-    questionTypeSingle.name = 'question_type[' + questionCount + ']';
-    questionTypeSingle.value = 'single';
-    questionTypeSingle.required = true;
-    var questionTypeSingleLabel = document.createElement('label');
-    questionTypeSingleLabel.textContent = 'Single Correct Answer';
-    questionTypeSingleLabel.setAttribute('for', 'question-type-single-' + questionCount);
-
-    var questionTypeMultiple = document.createElement('input');
-    questionTypeMultiple.type = 'radio';
-    questionTypeMultiple.id = 'question-type-multiple-' + questionCount;
-    questionTypeMultiple.name = 'question_type[' + questionCount + ']';
-    questionTypeMultiple.value = 'multiple';
-    var questionTypeMultipleLabel = document.createElement('label');
-    questionTypeMultipleLabel.textContent = 'Multiple Correct Answers';
-    questionTypeMultipleLabel.setAttribute('for', 'question-type-multiple-' + questionCount);
 
     var option1Label = document.createElement('label');
     option1Label.textContent = 'Option 1:';
@@ -127,11 +94,6 @@ addQuestionBtn.addEventListener('click', function() {
 
     newQuestion.appendChild(questionLabel);
     newQuestion.appendChild(questionInput);
-    newQuestion.appendChild(questionTypeLabel);
-    newQuestion.appendChild(questionTypeSingle);
-    newQuestion.appendChild(questionTypeSingleLabel);
-    newQuestion.appendChild(questionTypeMultiple);
-    newQuestion.appendChild(questionTypeMultipleLabel);
     newQuestion.appendChild(option1Label);
     newQuestion.appendChild(option1Input);
     newQuestion.appendChild(option2Label);
