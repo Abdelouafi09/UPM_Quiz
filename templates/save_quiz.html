@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Details</title>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
+  <style>
+    /* Reset default styles */
+body, h1, h2, h3, p, ul, nav, a {
+    margin: 0;
+    padding: 0;
+}
+
+/* Main styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header {
+    background-color: #007bff;
+    padding: 20px;
+    color: #fff;
+}
+
+header h1 {
+    margin-bottom: 10px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav ul li {
+    margin-right: 10px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+.content {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+footer {
+    background-color: #007bff;
+    padding: 10px;
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input[type="text"],
+form select,
+form textarea,
+form input[type="datetime-local"],
+form input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+form textarea {
+    resize: vertical;
+}
+
+form button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+footer {
+    background-color: #007bff;
+    padding: 10px;
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+}
+
+.question {
+    margin-bottom: 20px;
+}
+
+.question label {
+    font-weight: bold;
+}
+
+.question select {
+    width: 100%;
+}
+  </style>
+</head>
+<body>
+    <header>
+        <h1>Quiz Details</h1>
+        <nav>
+            <ul>
+                <li><a href="/professor/home">Home</a></li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/settings">Settings</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="content">
+        <h2>Quiz Details</h2>
+        <form action="/quiz/save_details" method="POST">
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject" required>
+            
+            <label for="class">Class:</label>
+            <input type="text" id="class" name="class" required>
+            
+            <label for="deadline">Deadline:</label>
+            <input type="datetime-local" id="deadline" name="deadline" required>
+            
+            <label for="timer">Quiz Timer (minutes):</label>
+            <input type="number" id="timer" name="timer" min="1" required>
+            
+            <h2>Questions</h2>
+
+{% for question in questions %}
+    <div class="question">
+        <h3>Q{{ loop.index }}</h3>
+        <p style='margin: 10px;'>{{ question.text }}</p>
+
+                </select>
+        <label for="answer-{{ loop.index }}">Answer:</label>
+        <select id="answer-{{ loop.index }}" name="answer[]" required>
+            {% for option in question.options %}
+                <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endfor %}
+          
+          
+            
+            <button type="submit">Save Quiz</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>UPM Quiz &copy; 2023. All rights reserved.</p>
+    </footer>
+</body>
+</html>
