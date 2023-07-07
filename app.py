@@ -23,7 +23,7 @@ def home():
 
 @app.route("/quiz/create")
 def create():
-  return render_template('create_quiz.html')
+  return render_template('login.html')
 
 
 if __name__ == "__main__":
