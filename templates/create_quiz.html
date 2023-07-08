@@ -45,7 +45,10 @@ form label {
     font-weight: bold;
 
 }
-
+form h3{
+  margin-top:3rem;
+  margin-bottom:1rem;
+}
 form input[type="text"],
 form select,
 form textarea,
@@ -103,9 +106,9 @@ form button:hover {
 }
 
 .question .question-type label {
-    display: inline-block;
+    display: block;
     margin-right: 10px;
-    color: #343a40;
+    color: #fff;
 }
 
 .question .question-type input[type="radio"] {
@@ -150,13 +153,7 @@ form button:hover {
             
             <label for="quiz-description">Quiz Description:</label>
             <textarea id="quiz-description" name="quiz_description" required></textarea>
-
-           <label for="subject">Subject:</label>
-            <input type="text" id="subject" name="subject" required>
-            
-            <label for="class">Class:</label>
-            <input type="text" id="class" name="class" required>
-            <h2>Questions</h2>
+            <h3>Questions</h3>
             <div id="question-section">
                 <div class="question">
                     <label for="question-1">Question:</label>
