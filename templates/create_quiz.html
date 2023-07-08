@@ -2,23 +2,149 @@
 <html>
 <head>
     <title>Create Quiz</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+    /* Existing styles... */
+/* Reset default styles */
+body, h1, h2, h3, p, ul, nav, a {
+    margin: 0;
+    padding: 0;
+}
+
+/* Main styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #212529;
+
+}
+
+header {
+    background-color: #343a40;
+    padding: 20px;
+}
+
+
+.content {
+    max-width: 800px;
+    margin: 20px auto;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #5b5b5d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quiz_detail{
+  text-align: center;
+  margin-bottom: 10px;
+
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+
+}
+
+form input[type="text"],
+form select,
+form textarea,
+form input[type="datetime-local"],
+form input[type="number"] {
+    width: 98%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #c7c7c7;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+form ,
+      form label{
+      color: #fff;
+}
+form textarea {
+    resize: vertical;
+}
+
+form button {
+    padding: 10px 20px;
+    background-color: #343a40;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #212529;
+}
+
+.question {
+    margin-bottom: 20px;
+}
+
+.question label {
+    font-weight: bold;
+
+}
+
+.question select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    color: #343a40;
+}
+
+.question .question-type {
+    margin-top: 10px;
+}
+
+.question .question-type label {
+    display: inline-block;
+    margin-right: 10px;
+    color: #343a40;
+}
+
+.question .question-type input[type="radio"] {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+    /* Styling the question type input */
+    .question-type label {
+        margin-right: 10px;
+    }
+
+    .question-type input[type="radio"] {
+        display: none;
+    }
+
+    .question-type input[type="radio"] + label {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #ddd;
+        color: #000;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .question-type input[type="radio"]:checked + label {
+        background-color: #212529;
+        color: #fff;
+    }
+</style>
 </head>
 <body>
-    <header>
-        <h1>Create Quiz</h1>
-        <nav>
-            <ul>
-                <li><a href="/professor/home">Home</a></li>
-                <li><a href="/profile">Profile</a></li>
-                <li><a href="/settings">Settings</a></li>
-                <li><a href="/logout">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    
+  
+   {% include 'nav.html' %}
     <div class="content">
         <form action="/quiz/save" method="POST">
+          <div class='quiz_detail'>
+            <h2>Enter the Quiz Questions</h2>
+            </div>
             <label for="quiz-title">Quiz Title:</label>
             <input type="text" id="quiz-title" name="quiz_title" required>
             
@@ -36,6 +162,14 @@
                     <label for="question-1">Question:</label>
                     <input type="text" id="question-1" name="question[]" required>
 
+                    <label for="question-type-1">Question Type:</label>
+                    <div class="question-type">
+                        <input type="radio" id="question-type-single-1" name="question_type[1]" value="single" required>
+                        <label for="question-type-single-1">Single Correct Answer</label>
+                        <input type="radio" id="question-type-multiple-1" name="question_type[1]" value="multiple">
+                        <label for="question-type-multiple-1">Multiple Correct Answers</label>
+                    </div>
+                    
                     <label for="option-1">Option 1:</label>
                     <input type="text" id="option-1" name="option-1[]" required>
                     
@@ -50,13 +184,11 @@
             <button type="submit">Next</button>
         </form>
     </div>
-
-    <footer>
-        <p>UPM Quiz &copy; 2023. All rights reserved.</p>
-    </footer>
+    {% include 'footer.html' %}
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
     <script>
-// Add option functionality
+      // Add option functionality
 var questionSection = document.getElementById('question-section');
 var addQuestionBtn = document.getElementById('add-question');
 var questionCount = 1;
@@ -72,6 +204,27 @@ addQuestionBtn.addEventListener('click', function() {
     questionInput.type = 'text';
     questionInput.name = 'question[]';
     questionInput.required = true;
+
+    var questionTypeLabel = document.createElement('label');
+    questionTypeLabel.textContent = 'Question Type:';
+    var questionTypeSingle = document.createElement('input');
+    questionTypeSingle.type = 'radio';
+    questionTypeSingle.id = 'question-type-single-' + questionCount;
+    questionTypeSingle.name = 'question_type[' + questionCount + ']';
+    questionTypeSingle.value = 'single';
+    questionTypeSingle.required = true;
+    var questionTypeSingleLabel = document.createElement('label');
+    questionTypeSingleLabel.textContent = 'Single Correct Answer';
+    questionTypeSingleLabel.setAttribute('for', 'question-type-single-' + questionCount);
+
+    var questionTypeMultiple = document.createElement('input');
+    questionTypeMultiple.type = 'radio';
+    questionTypeMultiple.id = 'question-type-multiple-' + questionCount;
+    questionTypeMultiple.name = 'question_type[' + questionCount + ']';
+    questionTypeMultiple.value = 'multiple';
+    var questionTypeMultipleLabel = document.createElement('label');
+    questionTypeMultipleLabel.textContent = 'Multiple Correct Answers';
+    questionTypeMultipleLabel.setAttribute('for', 'question-type-multiple-' + questionCount);
 
     var option1Label = document.createElement('label');
     option1Label.textContent = 'Option 1:';
@@ -92,8 +245,18 @@ addQuestionBtn.addEventListener('click', function() {
     addOptionBtn.classList.add('add-option');
     addOptionBtn.textContent = 'Add Option';
 
+    // Add the question type elements to a container div
+    var questionTypeContainer = document.createElement('div');
+    questionTypeContainer.classList.add('question-type');
+    questionTypeContainer.appendChild(questionTypeLabel);
+    questionTypeContainer.appendChild(questionTypeSingle);
+    questionTypeContainer.appendChild(questionTypeSingleLabel);
+    questionTypeContainer.appendChild(questionTypeMultiple);
+    questionTypeContainer.appendChild(questionTypeMultipleLabel);
+
     newQuestion.appendChild(questionLabel);
     newQuestion.appendChild(questionInput);
+    newQuestion.appendChild(questionTypeContainer);
     newQuestion.appendChild(option1Label);
     newQuestion.appendChild(option1Input);
     newQuestion.appendChild(option2Label);
