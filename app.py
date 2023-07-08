@@ -31,5 +31,10 @@ def pr_home():
   return render_template('pr_home.html')
 
 
+@app.route("/student")
+def st_home():
+  return render_template('st_home.html')
+
+
 if __name__ == "__main__":
   app.run(host='0.0.0.0', debug=True)
