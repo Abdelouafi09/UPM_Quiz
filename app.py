@@ -35,9 +35,12 @@ def nonhome():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-  if request.method == 'POST':
-    username = request.form['username']
-    password = request.form['password']
+  if 'username' in session:
+    return redirect('/home/' + str(session['id_user']))
+  else:
+    if request.method == 'POST':
+      username = request.form['username']
+      password = request.form['password']
 
     # Check if user exists and credentials are valid
     user = next(
