@@ -13,9 +13,6 @@ def load_users():
   with engine.connect() as conn:
     result = conn.execute(text("select * from users"))
     data = result.all()
-    keys = ['id', 'username', 'password', 'role', 'f_name', 'l_name']
+    keys = ['id_user', 'username', 'password', 'role', 'f_name', 'l_name']
     resultf = [dict(zip(keys, values)) for values in data]
     return (resultf)
-
-
-print(load_users())
