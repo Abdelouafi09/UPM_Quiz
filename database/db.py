@@ -1,16 +1,21 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, text
+import os
 
-# MySQL database credentials
-DB_NAME = "upm_quiz"
-DB_USERNAME = "x2d0n4hu08a86335jr05"
-DB_PASSWORD = "pscale_pw_jOpQNKgMzzSN5vc7NMoGQ0MjbgPySyE9AdT2cli0Xdj"
-DB_HOST = "aws.connect.psdb.cloud"
+db_connection_string = os.environ['DB_CONNECTION_STRING']
 
-# Create the database connection URL
-DB_URL = f"mysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+engine = create_engine(db_connection_string,
+                       connect_args={"ssl": {
+                         "ssl_ca": "/etc/ssl/cert.pem"
+                       }})
 
-# Create the engine and session
-engine = create_engine(DB_URL)
-Session = sessionmaker(bind=engine)
-session = Session()
+
+def load_users():
+  with engine.connect() as conn:
+    result = conn.execute(text("select * from users"))
+    data = result.all()
+    keys = ['id', 'username', 'password', 'role', 'f_name', 'l_name']
+    resultf = [dict(zip(keys, values)) for values in data]
+    return (resultf)
+
+
+print(load_users())
