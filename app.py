@@ -6,7 +6,6 @@ app.secret_key = 'your_secret_key'
 # Set a secret key for session management
 
 # Mock user data (replace with actual user retrieval from the database)
-users = load_users()
 
 
 @app.route('/')
@@ -38,27 +37,26 @@ def login():
   if 'username' in session:
     return redirect('/home/' + str(session['id_user']))
   else:
+    users = load_users()
     if request.method == 'POST':
       username = request.form['username']
       password = request.form['password']
 
-    # Check if user exists and credentials are valid
-    user = next(
-      (user for user in users
-       if user['username'] == username and user['password'] == password), None)
-
-    if user:
-      session['id_user'] = user['id_user']
-      session['first_name'] = user['f_name']
-      session['last_name'] = user['l_name']
-      session['username'] = user['username']
-      session['user_role'] = user['role']
-      return redirect('/home/' + str(session['id_user']))
-    else:
-      error = 'Invalid username or password. Please try again.'
-      return render_template('login.html', error=error)
-
-  return render_template('login.html')
+      user = next(
+        (user for user in users
+         if user['username'] == username and user['password'] == password),
+        None)
+      if user:
+        session['id_user'] = user['id_user']
+        session['first_name'] = user['f_name']
+        session['last_name'] = user['l_name']
+        session['username'] = user['username']
+        session['user_role'] = user['role']
+        return redirect('/home/' + str(session['id_user']))
+      else:
+        error = 'Invalid username or password. Please try again.'
+        return render_template('login.html', error=error)
+    return render_template('login.html')
 
 
 @app.route('/home/<int:id_user>')
