@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request, redirect, session
 from database.db import load_users, load_subjects_for_professor
-from sqlalchemy import  text
-
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -80,9 +78,13 @@ def home(id_user):
 @app.route('/create_quiz/<int:id_user>')
 def create(id_user):
   if 'id_user' in session and session['id_user'] == id_user:
-    return render_template('create_quiz.html', id_user=id_user)
+    SUBJECTS = load_subjects_for_professor(id_user)
+    return render_template('create_quiz.html',
+                           id_user=id_user,
+                           subjects=SUBJECTS)
   else:
     return redirect('/login')
+
 
 @app.route('/save_quiz', methods=['GET', 'POST'])
 def save():
@@ -99,7 +101,7 @@ def save():
     # get the questions and options data
     questions = []
     options = []
-    for i in range(1, num_questions + 1): # loop for each question
+    for i in range(1, num_questions + 1):  # loop for each question
       # get the question content
       question_content = request.form.get('question_{}'.format(i))
       # append it to the questions list
@@ -111,14 +113,13 @@ def save():
       option_data = list(zip(option_content, option_correct))
       options.append(option_data)
     # call the save_quiz function from db module with form data as arguments
-    save_quiz(quiz_name, subject_id, start_time, end_time, duration, attempts, num_questions, questions, options)
+    save_quiz(quiz_name, subject_id, start_time, end_time, duration, attempts,
+              num_questions, questions, options)
     # return a response
     return redirect(url_for('/home'))
   else:
     # render the form template
     return render_template('create_quiz.html')
-
-
 
 
 @app.route('/logout')
@@ -129,8 +130,6 @@ def logout():
 
 if __name__ == "__main__":
   app.run(host='0.0.0.0', debug=True)
-
-
 
 # from flask import Flask, request, render_template, redirect, session
 # from flask_sqlalchemy import SQLAlchemy
@@ -153,7 +152,7 @@ if __name__ == "__main__":
 # class users(db.Model):
 #   id = db.Column('user_id', db.Integer, primary_key= True)
 #   username = db.Column(db.String(225))
-#   user_password = db.Column(db.String(225))  
+#   user_password = db.Column(db.String(225))
 #   user_role = db.Column(db.Enum('admin', 'student',
 #                                  'professor'),
 #                          nullable=False)
@@ -166,8 +165,6 @@ if __name__ == "__main__":
 #   self.user_role = user_role
 #   self.f_name = f_name
 #   self.l_name = l_name
-
-
 
 # class Users(db.Model):
 #     id = db.Column('user_id', db.Integer, primary_key=True)
@@ -199,14 +196,12 @@ if __name__ == "__main__":
 #         self.degree = degree
 #         self.specialization = specialization
 
-
 # class Students(db.Model):
 #     user_id = db.Column(db.Integer, primary_key=True)
 #     class_id = db.Column(db.Integer, nullable=False)
 
 #     def __init__(self, class_id):
 #         self.class_id = class_id
-
 
 # class Classes(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -219,14 +214,12 @@ if __name__ == "__main__":
 #         self.class_field = class_field
 #         self.class_level = class_level
 
-
 # class Subjects(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
 #     sub_name = db.Column(db.String(255), unique=True, nullable=False)
 
 #     def __init__(self, sub_name):
 #         self.sub_name = sub_name
-
 
 # class ClassSubjects(db.Model):
 #     class_id = db.Column(db.Integer, primary_key=True)
@@ -237,7 +230,6 @@ if __name__ == "__main__":
 #         self.class_id = class_id
 #         self.subject_id = subject_id
 #         self.professor_id = professor_id
-
 
 # class Quizzes(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -256,7 +248,6 @@ if __name__ == "__main__":
 #         self.duration = duration
 #         self.attempts = attempts
 
-
 # class Questions(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
 #     quiz_id = db.Column(db.Integer, nullable=False)
@@ -265,7 +256,6 @@ if __name__ == "__main__":
 #     def __init__(self, quiz_id, q_content):
 #         self.quiz_id = quiz_id
 #         self.q_content = q_content
-
 
 # class Options(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -277,7 +267,6 @@ if __name__ == "__main__":
 #         self.question_id = question_id
 #         self.o_content = o_content
 #         self.is_correct = is_correct
-
 
 # class QuizResults(db.Model):
 #     quiz_id = db.Column(db.Integer, primary_key=True)
@@ -292,7 +281,6 @@ if __name__ == "__main__":
 #         self.score = score
 #         self.attempt = attempt
 #         self.completed_at = completed_at
-
 
 # class StudentAnswers(db.Model):
 #     quiz_result_id = db.Column(db.Integer, primary_key=True)
@@ -313,7 +301,6 @@ if __name__ == "__main__":
 #     else:
 #         return redirect('login')
 
-
 # @app.route('/home')
 # def nhome():
 #     if 'username' in session:
@@ -321,15 +308,12 @@ if __name__ == "__main__":
 #     else:
 #         return redirect('login')
 
-
 # @app.route('/home/')
 # def nonhome():
 #     if 'username' in session:
 #         return redirect('/home/' + str(session['id_user']))
 #     else:
 #         return redirect('login')
-
-
 
 # @app.route('/login', methods=['GET', 'POST'])
 # def login():
@@ -355,8 +339,6 @@ if __name__ == "__main__":
 
 #         return render_template('login.html')
 
-
-
 # @app.route('/home')
 # def home(id_user):
 #     user_role = session.get('user_role')
@@ -371,12 +353,10 @@ if __name__ == "__main__":
 #     else:
 #         return redirect('/login')
 
-
 # @app.route('/logout')
 # def logout():
 #   session.clear()
 #   return redirect('/login')
-
 
 # if __name__ == "__main__":
 #   app.run(host='0.0.0.0', debug=True)
