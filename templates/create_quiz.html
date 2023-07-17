@@ -156,9 +156,11 @@ form button:hover {
       <label for="subject_id">Subject:</label>
       <select name="subject_id" id="subject_id" required>
         <!-- Retrieve and populate subjects from the database -->
+
         {% for subject in subjects %}
         <option value="{{ subject.id }}">{{ subject.sub_name }}</option>
         {% endfor %}
+      
       </select>
     </div>
 
@@ -189,91 +191,103 @@ form button:hover {
         <!-- Question fields will be dynamically added here -->
       </div>
 
-      <button type="button" id="add-question" class="add-question">Add Question</button>
+     <button type="button" id="add-question" class="add-question">Add Question</button>
+<input type="hidden" name="num_questions" id="num_questions" value="0">
     </div>
 
     <button type="submit">Save Quiz</button>
 
     <script>
-      // JavaScript logic to handle dynamic question and option fields
-      document.addEventListener('DOMContentLoaded', function() {
-        const questionContainer = document.getElementById('question-container');
-        const addQuestionBtn = document.getElementById('add-question');
+  // JavaScript logic to handle dynamic question and option fields
+  document.addEventListener('DOMContentLoaded', function() {
+    const questionContainer = document.getElementById('question-container');
+    const addQuestionBtn = document.getElementById('add-question');
+    const numQuestionsInput = document.getElementById('num_questions');
 
-        let questionCount = 1;
+    let questionCount = 0;
+    let numQuestions = 0;
 
-        // Function to create a new question field
-        function createQuestionField() {
-          const questionField = document.createElement('div');
-          questionField.className = 'question';
+    // Function to create a new question field
+    function createQuestionField() {
+      questionCount++;
+      numQuestions++;
 
-          questionField.innerHTML = `
-            <label for="question_${questionCount}">Question ${questionCount}:</label>
-            <textarea name="question_${questionCount}" id="question_${questionCount}" required></textarea>
+      const questionField = document.createElement('div');
+      questionField.className = 'question';
 
-            <div class="options">
-              <div class="option">
-                <label for="option_${questionCount}_1">Option 1:</label>
-                <input type="text" name="option_${questionCount}_1" id="option_${questionCount}_1" required>
-                <input type="checkbox" name="correct_option_${questionCount}" id="correct_option_${questionCount}_1" value="option_${questionCount}_1">
-                <label for="correct_option_${questionCount}_1">Correct</label>
-              </div>
-            </div>
+      questionField.innerHTML = `
+        <label for="question_${questionCount}">Question ${numQuestions}:</label>
+        <textarea name="question_${numQuestions}" id="question_${questionCount}" required></textarea>
 
-            <button type="button" class="add-option">Add Option</button>
-            <button type="button" class="remove-option">Remove Option</button>
-            <button type="button" class="remove-question">Remove Question</button>
-          `;
+        <div class="options">
+          <div class="option">
+            <label for="option_${questionCount}_1">Option 1:</label>
+            <input type="text" name="option_${numQuestions}_1" id="option_${questionCount}_1" required>
+            <input type="checkbox" name="correct_option_${numQuestions}" id="correct_option_${questionCount}_1" value="option_${numQuestions}_1">
+            <label for="correct_option_${questionCount}_1">Correct</label>
+          </div>
+        </div>
 
-          questionContainer.appendChild(questionField);
+        <button type="button" class="add-option">Add Option</button>
+        <button type="button" class="remove-option">Remove Option</button>
+        <button type="button" class="remove-question">Remove Question</button>
+      `;
 
-          questionCount++;
+      questionContainer.appendChild(questionField);
+
+      numQuestionsInput.value = numQuestions;
+    }
+
+    // Event listener for adding a new question
+    addQuestionBtn.addEventListener('click', function() {
+      createQuestionField();
+    });
+
+    // Event delegation for adding an option to a question
+    document.addEventListener('click', function(event) {
+      if (event.target.classList.contains('add-option')) {
+        const optionsContainer = event.target.parentElement.querySelector('.options');
+        const questionField = event.target.closest('.question');
+        const questionNumber = questionField.querySelector('label').textContent.match(/\d+/)[0];
+        const optionCount = optionsContainer.childElementCount + 1;
+
+        const newOption = document.createElement('div');
+        newOption.className = 'option';
+        newOption.innerHTML = `
+          <label for="option_${questionCount}_${optionCount}">Option ${optionCount}:</label>
+          <input type="text" name="option_${questionNumber}_${optionCount}" id="option_${questionCount}_${optionCount}" required>
+          <input type="checkbox" name="correct_option_${questionNumber}" id="correct_option_${questionCount}_${optionCount}" value="option_${questionNumber}_${optionCount}">
+          <label for="correct_option_${questionCount}_${optionCount}">Correct</label>
+        `;
+
+        optionsContainer.appendChild(newOption);
+      }
+    });
+
+    // Event delegation for removing the last option from a question
+    document.addEventListener('click', function(event) {
+      if (event.target.classList.contains('remove-option')) {
+        const optionsContainer = event.target.parentElement.querySelector('.options');
+
+        if (optionsContainer.childElementCount > 1) {
+          optionsContainer.lastElementChild.remove();
         }
+      }
+    });
 
-        // Event listener for adding a new question
-        addQuestionBtn.addEventListener('click', function() {
-          createQuestionField();
-        });
+    // Event delegation for removing a question
+    document.addEventListener('click', function(event) {
+      if (event.target.classList.contains('remove-question')) {
+        const questionField = event.target.closest('.question');
+        questionField.remove();
+        numQuestions--;
 
-        // Event delegation for adding an option to a question
-        document.addEventListener('click', function(event) {
-          if (event.target.classList.contains('add-option')) {
-            const optionsContainer = event.target.parentElement.querySelector('.options');
-            const optionCount = optionsContainer.childElementCount + 1;
+        numQuestionsInput.value = numQuestions;
+      }
+    });
+  });
+</script>
 
-            const newOption = document.createElement('div');
-            newOption.className = 'option';
-            newOption.innerHTML = `
-              <label for="option_${questionCount}_${optionCount}">Option ${optionCount}:</label>
-              <input type="text" name="option_${questionCount}_${optionCount}" id="option_${questionCount}_${optionCount}" required>
-              <input type="checkbox" name="correct_option_${questionCount}" id="correct_option_${questionCount}_${optionCount}" value="option_${questionCount}_${optionCount}">
-              <label for="correct_option_${questionCount}_${optionCount}">Correct</label>
-            `;
-
-            optionsContainer.appendChild(newOption);
-          }
-        });
-
-        // Event delegation for removing the last option from a question
-        document.addEventListener('click', function(event) {
-          if (event.target.classList.contains('remove-option')) {
-            const optionsContainer = event.target.parentElement.querySelector('.options');
-
-            if (optionsContainer.childElementCount > 1) {
-              optionsContainer.lastElementChild.remove();
-            }
-          }
-        });
-
-        // Event delegation for removing a question
-        document.addEventListener('click', function(event) {
-          if (event.target.classList.contains('remove-question')) {
-            const questionField = event.target.parentElement;
-            questionField.remove();
-          }
-        });
-      });
-    </script>
   </form>
 </body>
 </html>
