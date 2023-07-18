@@ -37,7 +37,7 @@ class User(Base):
   f_name = Column(String(100), nullable=False)
   l_name = Column(String(100), nullable=False)
 
-  professor = relationship('Professor', uselist=False, backref='user')
+  professor = relationship('Professor', uselist=False, backref='user', cascade="all, delete")
 
 
 class Professor(Base):
@@ -61,12 +61,15 @@ class ProfessorForm(FlaskForm):
 # Routes and view functions
 
 
-@app.route('/delete_professor/<int:professor_id>', methods=['POST', 'DELETE'])
-def delete_professor(professor_id):
-  if request.method == 'POST' or request.method == 'DELETE':
-    professor = session0.query(Professor).get(professor_id)
-    session0.delete(professor)
+@app.route('/delete_professor/<int:user_id>', methods=['POST'])
+def delete(user_id):
+    # Find the user by id
+    user = session0.query(User).get(user_id)
+
+    # Delete the user from the database
+    session0.delete(user)
     session0.commit()
+
     return redirect('/dashboard')
 
 
