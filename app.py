@@ -59,6 +59,17 @@ class ProfessorForm(FlaskForm):
 
 
 # Routes and view functions
+
+
+@app.route('/delete_professor/<int:professor_id>', methods=['POST', 'DELETE'])
+def delete_professor(professor_id):
+  if request.method == 'POST' or request.method == 'DELETE':
+    professor = session0.query(Professor).get(professor_id)
+    session0.delete(professor)
+    session0.commit()
+    return redirect('/dashboard')
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def add_professor():
   form = ProfessorForm()
@@ -87,8 +98,8 @@ def add_professor():
 
     return redirect(
       '/dashboard')  # Redirect to a success page or desired route
-
-  return render_template('dashboard.html', form=form)
+  professors = session0.query(Professor).all()
+  return render_template('dashboard.html', form=form, professors=professors)
 
 
 @app.route('/success')
