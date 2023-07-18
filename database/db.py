@@ -1,5 +1,7 @@
 from sqlalchemy import create_engine, text
 import os
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 db_connection_string = os.environ['DB_CONNECTION_STRING']
 
@@ -19,18 +21,16 @@ def load_users():
 
 
 def load_subjects_for_professor(professor_id):
-    with engine.connect() as conn:
-        query = text("""
+  with engine.connect() as conn:
+    query = text("""
             SELECT s.id, s.sub_name
             FROM subjects AS s
             JOIN class_subjects AS cs ON s.id = cs.subject_id
             WHERE cs.professor_id = :professor_id
         """).bindparams(professor_id=professor_id)
-        result = conn.execute(query)
-        subjects = []
-        for row in result:
-            subject_id, subject_name = row
-            subjects.append({'id': subject_id, 'sub_name': subject_name})
-        return subjects
-
-
+    result = conn.execute(query)
+    subjects = []
+    for row in result:
+      subject_id, subject_name = row
+      subjects.append({'id': subject_id, 'sub_name': subject_name})
+    return subjects

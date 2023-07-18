@@ -194,7 +194,9 @@ form button:hover {
     margin: 0;
     padding: 0;
 }
-
+h1{
+  text-align: center;
+}
 /* Main styles */
 body {
     font-family: Arial, sans-serif;
@@ -261,22 +263,28 @@ h2{
     .btn-success {
       background-color: #28a745;
       border-color: #28a745;
-      margin-top: 1rem;
+      margin-bottom: 1rem;
     }
 
     .btn-success:hover {
       background-color: #1f9431;
       border-color: #1f9431;
     }
+    input, select{
+      margin-bottom: 10px;
+    }
+    label{
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
   {% include 'nav.html' %}
-    <div class="content">
+  <div class="content">
     <h1>Admin Panel</h1>
-<hr>
+    <hr>
     <h2>Classes</h2>
-      <hr>
+
     <!-- Display a table of classes with edit and delete buttons -->
     <table class="table">
       <thead>
@@ -321,9 +329,9 @@ h2{
       </div>
       <button type="submit" class="btn btn-success">Add Class</button>
     </form>
-
+    <hr>
     <h2>Subjects</h2>
-      <hr>
+
     <!-- Display a table of subjects with edit and delete buttons -->
     <table class="table">
       <thead>
@@ -356,9 +364,22 @@ h2{
       </div>
       <button type="submit" class="btn btn-success">Add Subject</button>
     </form>
-
+    <hr>
     <h2>Users</h2>
-      <hr>
+<div id="user-form-container" style="display: none;">
+    <form id="user-edit-form">
+      <input type="hidden" id="user-id" name="user-id">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+      <button type="submit" class="btn btn-success">Save</button>
+    </form>
+  </div>
     <!-- Display a table of users with edit and delete buttons -->
     <table class="table">
       <thead>
@@ -402,78 +423,106 @@ h2{
       <button type="submit" class="btn btn-success">Add User</button>
     </form>
   </div>
-
+  {% include 'footer.html' %}
+  <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    $(document).ready(function() {
+
+$(document).ready(function () {
+      $('.edit-user').click(function () {
+        var userId = $(this).data('id');
+        $('#user-id').val(userId); // Store the ID in the hidden field
+        $('#user-form-container').show();
+        // Perform necessary actions to fetch user data based on the ID and populate the form fields
+      });
+
+      $('#user-edit-form').submit(function (e) {
+        e.preventDefault();
+        var userId = $('#user-id').val(); // Retrieve the stored ID from the hidden field
+        var username = $('#username').val();
+        var email = $('#email').val();
+        // Process the form data (including the ID) and send it to the appropriate backend route for saving
+      });
+    });
+
+
+
+
+
+    
+    $(document).ready(function () {
       // Show class form
-      $('#show-class-form').click(function() {
+      $('#show-class-form').click(function () {
         $('#add-class-form').toggle();
       });
 
       // Show subject form
-      $('#show-subject-form').click(function() {
+      $('#show-subject-form').click(function () {
         $('#add-subject-form').toggle();
       });
 
       // Show user form
-      $('#show-user-form').click(function() {
+      $('#show-user-form').click(function () {
         $('#add-user-form').toggle();
       });
 
       // Add class form submission
-      $('#add-class-form').submit(function(e) {
+      $('#add-class-form').submit(function (e) {
         e.preventDefault();
         // Process form data and send it to the appropriate Flask route
       });
 
       // Add subject form submission
-      $('#add-subject-form').submit(function(e) {
+      $('#add-subject-form').submit(function (e) {
         e.preventDefault();
         // Process form data and send it to the appropriate Flask route
       });
 
       // Add user form submission
-      $('#add-user-form').submit(function(e) {
+      $('#add-user-form').submit(function (e) {
         e.preventDefault();
         // Process form data and send it to the appropriate Flask route
       });
 
       // Edit class button click
-      $('.edit-class').click(function() {
+      $('.edit-class').click(function () {
         var classId = $(this).data('id');
         // Perform necessary actions to edit the class with the given ID
       });
 
       // Delete class button click
-      $('.delete-class').click(function() {
+      $('.delete-class').click(function () {
         var classId = $(this).data('id');
         // Perform necessary actions to delete the class with the given ID
       });
 
       // Edit subject button click
-      $('.edit-subject').click(function() {
+      $('.edit-subject').click(function () {
         var subjectId = $(this).data('id');
         // Perform necessary actions to edit the subject with the given ID
       });
 
       // Delete subject button click
-      $('.delete-subject').click(function() {
+      $('.delete-subject').click(function () {
         var subjectId = $(this).data('id');
         // Perform necessary actions to delete the subject with the given ID
       });
 
       // Edit user button click
-      $('.edit-user').click(function() {
+      $('.edit-user').click(function () {
         var userId = $(this).data('id');
         // Perform necessary actions to edit the user with the given ID
       });
 
       // Delete user button click
-      $('.delete-user').click(function() {
+      $('.delete-user').click(function () {
         var userId = $(this).data('id');
         // Perform necessary actions to delete the user with the given ID
       });
     });
   </script>
+</body>
+
+
+
 </body>
 </html>
