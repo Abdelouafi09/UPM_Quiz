@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField
+from wtforms import StringField, PasswordField, SelectField, HiddenField
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
@@ -50,13 +50,15 @@ class Professor(Base):
 
 # Define the form for adding a new professor
 class ProfessorForm(FlaskForm):
-  username = StringField('Username', validators=[DataRequired()])
-  password = PasswordField('Password', validators=[DataRequired()])
-  f_name = StringField('First Name', validators=[DataRequired()])
-  l_name = StringField('Last Name', validators=[DataRequired()])
-  degree = StringField('Degree', validators=[DataRequired()])
-  specialization = StringField('Specialization', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    f_name = StringField('First Name', validators=[DataRequired()])
+    l_name = StringField('Last Name', validators=[DataRequired()])
+    degree = StringField('Degree', validators=[DataRequired()])
+    specialization = StringField('Specialization', validators=[DataRequired()])
+    professor_id = HiddenField('Professor ID')
 
+  
 
 # Routes and view functions
 
@@ -103,6 +105,57 @@ def add_professor():
       '/dashboard')  # Redirect to a success page or desired route
   professors = session0.query(Professor).all()
   return render_template('dashboard.html', form=form, professors=professors)
+
+
+
+@app.route('/edit_professor/<int:professor_id>', methods=['GET', 'POST'])
+def edit_professor(professor_id):
+    # Get the professor from the database
+    professor = session0.query(Professor).get(professor_id)
+    if not professor:
+        # If the professor is not found, redirect to the dashboard page
+        return redirect('/dashboard')
+
+    form = ProfessorForm()
+
+    if form.validate_on_submit():
+        # Retrieve data from the form
+        username = form.username.data
+        password = form.password.data
+        f_name = form.f_name.data
+        l_name = form.l_name.data
+        degree = form.degree.data
+        specialization = form.specialization.data
+
+        # Update the professor details
+        professor.degree = degree
+        professor.specialization = specialization
+
+        # Find the associated user and update their details
+        user = professor.user
+        user.username = username
+        user.user_password = password
+        user.f_name = f_name
+        user.l_name = l_name
+
+        # Save the changes to the database
+        session0.commit()
+
+        return redirect('/dashboard')
+
+    # Populate the form fields with the professor's current data
+    form.username.data = professor.user.username
+    form.password.data = professor.user.user_password
+    form.f_name.data = professor.user.f_name
+    form.l_name.data = professor.user.l_name
+    form.degree.data = professor.degree
+    form.specialization.data = professor.specialization
+    form.professor_id.data = professor.user_id
+
+    return render_template('edit_prof.html', form=form, professor=professor)
+
+
+
 
 
 @app.route('/success')
