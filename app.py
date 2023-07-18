@@ -146,7 +146,7 @@ def add_professor():
     return redirect(
       '/dashboard')  # Redirect to a success page or desired route
   
-  query = select(User.username, User.f_name, User.l_name, Class.class_name, User.username).select_from(User).\
+  query = select(User.username, User.f_name, User.l_name, Class.class_name, User.user_id).select_from(User).\
         join(Student).join(Class)
   
     # Execute the query and fetch the results
