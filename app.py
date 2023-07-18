@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, redirect, session
-from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, Boolean, Float, Enum
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, Boolean, Float, Enum, text, select
 import os
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,25 +27,67 @@ Base = declarative_base()
 #Models
 
 
+# class User(Base):
+#   __tablename__ = 'users'
+
+#   user_id = Column(Integer, primary_key=True, autoincrement=True)
+#   username = Column(String(255), unique=True, nullable=False)
+#   user_password = Column(String(255), nullable=False)
+#   user_role = Column(Enum('admin', 'student', 'professor'), nullable=False)
+#   f_name = Column(String(100), nullable=False)
+#   l_name = Column(String(100), nullable=False)
+
+#   professor = relationship('Professor', uselist=False, backref='user', cascade="all, delete")
+
+
+# class Professor(Base):
+#   __tablename__ = 'professors'
+
+#   user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
+#   degree = Column(String(255), nullable=False)
+#   specialization = Column(String(255), nullable=False)
+
+
 class User(Base):
-  __tablename__ = 'users'
+    __tablename__ = 'users'
 
-  user_id = Column(Integer, primary_key=True, autoincrement=True)
-  username = Column(String(255), unique=True, nullable=False)
-  user_password = Column(String(255), nullable=False)
-  user_role = Column(Enum('admin', 'student', 'professor'), nullable=False)
-  f_name = Column(String(100), nullable=False)
-  l_name = Column(String(100), nullable=False)
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(255), unique=True, nullable=False)
+    user_password = Column(String(255), nullable=False)
+    user_role = Column(Enum('admin', 'student', 'professor'), nullable=False)
+    f_name = Column(String(100), nullable=False)
+    l_name = Column(String(100), nullable=False)
 
-  professor = relationship('Professor', uselist=False, backref='user', cascade="all, delete")
+    professor = relationship('Professor', uselist=False, backref='user', cascade="all, delete")
+    students = relationship('Student', backref='user', cascade="all, delete")
 
 
 class Professor(Base):
-  __tablename__ = 'professors'
+    __tablename__ = 'professors'
 
-  user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
-  degree = Column(String(255), nullable=False)
-  specialization = Column(String(255), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
+    degree = Column(String(255), nullable=False)
+    specialization = Column(String(255), nullable=False)
+
+
+class Student(Base):
+    __tablename__ = 'students'
+
+    user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
+    class_id = Column(Integer, ForeignKey('classes.id'), nullable=False)
+    class_ = relationship('Class', backref='students')
+
+
+class Class(Base):
+    __tablename__ = 'classes'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    class_name = Column(String(255), unique=True, nullable=False)
+    class_field = Column(String(255), nullable=False)
+    class_level = Column(Integer, nullable=False)
+
+
+
 
 
 # Define the form for adding a new professor
@@ -103,8 +145,15 @@ def add_professor():
 
     return redirect(
       '/dashboard')  # Redirect to a success page or desired route
+  
+  query = select(User.username, User.f_name, User.l_name, Class.class_name, User.username).select_from(User).\
+        join(Student).join(Class)
+  
+    # Execute the query and fetch the results
+  result = session0.execute(query)
+  students = result.fetchall()
   professors = session0.query(Professor).all()
-  return render_template('dashboard.html', form=form, professors=professors)
+  return render_template('dashboard.html', form=form, professors=professors, students=students)
 
 
 
