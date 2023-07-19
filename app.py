@@ -137,7 +137,7 @@ def dashboard():
     result = session0.execute(query)
     students = result.fetchall()
     professors = session0.query(Professor).all()
-    return render_template('dashboard.html', form=form_prof, professors=professors, students=students)
+    return render_template('dashboard.html', form_prof=form_prof, professors=professors, students=students)
 
 
 @app.route('/edit_professor/<int:professor_id>', methods=['GET', 'POST'])

@@ -247,51 +247,51 @@ h2{
 
     <button class="btn btn-primary" id="show-user-form">Add Professor</button>
     <form id="add-user-form" style="display: none;" method="POST">
-    {{ form.hidden_tag() }}
+    {{ form_prof.hidden_tag() }}
     <p>
-        {{ form.username.label }}<br>
-        {{ form.username(size=20) }}
-        {% for error in form.username.errors %}
+        {{ form_prof.username.label }}<br>
+        {{ form_prof.username(size=20) }}
+        {% for error in form_prof.username.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </p>
     <p>
-        {{ form.password.label }}<br>
-        {{ form.password(size=20) }}
-        {% for error in form.password.errors %}
+        {{ form_prof.password.label }}<br>
+        {{ form_prof.password(size=20) }}
+        {% for error in form_prof.password.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </p>
     <p>
-        {{ form.f_name.label }}<br>
-        {{ form.f_name(size=20) }}
-        {% for error in form.f_name.errors %}
+        {{ form_prof.f_name.label }}<br>
+        {{ form_prof.f_name(size=20) }}
+        {% for error in form_prof.f_name.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </p>
     <p>
-        {{ form.l_name.label }}<br>
-        {{ form.l_name(size=20) }}
-        {% for error in form.l_name.errors %}
+        {{ form_prof.l_name.label }}<br>
+        {{ form_prof.l_name(size=20) }}
+        {% for error in form_prof.l_name.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </p>
     <p>
-        {{ form.degree.label }}<br>
-        {{ form.degree(size=20) }}
-        {% for error in form.degree.errors %}
+        {{ form_prof.degree.label }}<br>
+        {{ form_prof.degree(size=20) }}
+        {% for error in form_prof.degree.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </p>
     <p>
-        {{ form.specialization.label }}<br>
-        {{ form.specialization(size=20) }}
-        {% for error in form.specialization.errors %}
+        {{ form_prof.specialization.label }}<br>
+        {{ form_prof.specialization(size=20) }}
+        {% for error in form_prof.specialization.errors %}
             <span style="color: red;">{{ error }}</span>
         {% endfor %}
     </p>
-    {% if form.professor_id.data %}
-        <input type="hidden" name="professor_id" value="{{ form.professor_id.data }}">
+    {% if form_prof.professor_id.data %}
+        <input type="hidden" name="professor_id" value="{{ form_prof.professor_id.data }}">
     {% endif %}
     <p>
         <input type="submit" class="btn btn-success" value="Add Professor">
