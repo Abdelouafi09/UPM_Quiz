@@ -180,7 +180,7 @@ h2{
       <td>{{ student[3] }}</td>
                 
                 <td>
-                   <form method="POST" action="/delete_professor/{{ student[4] }}" onsubmit="return confirm('Are you sure you want to delete this Student?')" style="display:inline;">
+                   <form method="POST" action="/delete_user/{{ student[4] }}" onsubmit="return confirm('Are you sure you want to delete this Student?')" style="display:inline;">
                         <input type="hidden" name="_method" value="DELETE">
                         <button class="btn btn-danger btn-sm delete-user" type="submit">Delete</button>
                     </form>
@@ -233,7 +233,7 @@ h2{
                     </form>
                   
                   
-            <form method="POST" action="/delete_professor/{{ professor.user_id }}" onsubmit="return confirm('Are you sure you want to delete this professor?')" style="display:inline;">
+            <form method="POST" action="/delete_user/{{ professor.user_id }}" onsubmit="return confirm('Are you sure you want to delete this professor?')" style="display:inline;">
                         <input type="hidden" name="_method" value="DELETE">
                         <button class="btn btn-danger btn-sm delete-user" type="submit">Delete</button>
                     </form>
