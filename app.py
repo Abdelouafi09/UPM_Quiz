@@ -78,6 +78,8 @@ def delete(user_id):
     session0.commit()
 
 # Add professor
+
+
 def add_professor(form):
     if form.validate_on_submit():
         # Retrieve data from the form
@@ -103,6 +105,13 @@ def add_professor(form):
 
         return redirect(
             '/dashboard')  # Redirect to a success page or desired route
+
+
+# Load professors
+def load_professors():
+    professors = session0.query(Professor).all()
+    return professors
+
 # Define the forms for adding
 
 
@@ -136,7 +145,7 @@ def dashboard():
     # Execute the query and fetch the results
     result = session0.execute(query)
     students = result.fetchall()
-    professors = session0.query(Professor).all()
+    professors = load_professors()
     return render_template('dashboard.html', form_prof=form_prof, professors=professors, students=students)
 
 
