@@ -144,6 +144,17 @@ def edit_prof(professor, form):
     # Save the changes to the database
     session0.commit()
 
+# fill the edit professor form with current data
+
+
+def fill_prof_form(professor, form):
+    form.username.data = professor.user.username
+    form.password.data = professor.user.user_password
+    form.f_name.data = professor.user.f_name
+    form.l_name.data = professor.user.l_name
+    form.degree.data = professor.degree
+    form.specialization.data = professor.specialization
+    form.professor_id.data = professor.user_id
 
 # --------------------Define the forms------------------------
 
@@ -196,17 +207,10 @@ def edit_professor(professor_id):
     if form.validate_on_submit():
         # Retrieve data from the form
         edit_prof(professor, form)
-
         return redirect('/dashboard')
 
     # Populate the form fields with the professor's current data
-    form.username.data = professor.user.username
-    form.password.data = professor.user.user_password
-    form.f_name.data = professor.user.f_name
-    form.l_name.data = professor.user.l_name
-    form.degree.data = professor.degree
-    form.specialization.data = professor.specialization
-    form.professor_id.data = professor.user_id
+    fill_prof_form(professor, form)
 
     return render_template('edit_prof.html', form=form, professor=professor)
 
