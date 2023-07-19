@@ -69,7 +69,7 @@ class Class(Base):
 
 # -------------------------------------------Define functions-----------------------------------------------------
 
-# delete users (professor, student, admin)
+# Delete users (professor, student, admin)
 def delete(user_id):
     # Find the user by id
     user = session0.query(User).get(user_id)
@@ -77,33 +77,8 @@ def delete(user_id):
     session0.delete(user)
     session0.commit()
 
-
-# Define the forms for adding
-
-
-class ProfessorForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    f_name = StringField('First Name', validators=[DataRequired()])
-    l_name = StringField('Last Name', validators=[DataRequired()])
-    degree = StringField('Degree', validators=[DataRequired()])
-    specialization = StringField('Specialization', validators=[DataRequired()])
-    professor_id = HiddenField('Professor ID')
-
-
-# Routes and view functions
-
-
-@app.route('/delete_user/<int:user_id>', methods=['POST'])
-def sup_user(user_id):
-    delete(user_id)
-    return redirect('/dashboard')
-
-
-@app.route('/dashboard', methods=['GET', 'POST'])
-def add_professor():
-    form = ProfessorForm()
-
+# Add professor
+def add_professor(form):
     if form.validate_on_submit():
         # Retrieve data from the form
         username = form.username.data
@@ -128,6 +103,32 @@ def add_professor():
 
         return redirect(
             '/dashboard')  # Redirect to a success page or desired route
+# Define the forms for adding
+
+
+class ProfessorForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    f_name = StringField('First Name', validators=[DataRequired()])
+    l_name = StringField('Last Name', validators=[DataRequired()])
+    degree = StringField('Degree', validators=[DataRequired()])
+    specialization = StringField('Specialization', validators=[DataRequired()])
+    professor_id = HiddenField('Professor ID')
+
+
+# Routes and view functions
+
+
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+def sup_user(user_id):
+    delete(user_id)
+    return redirect('/dashboard')
+
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    form_prof = ProfessorForm()
+    add_professor(form_prof)
 
     query = select(User.username, User.f_name, User.l_name, Class.class_name, User.user_id).select_from(User). \
         join(Student).join(Class)
@@ -136,7 +137,7 @@ def add_professor():
     result = session0.execute(query)
     students = result.fetchall()
     professors = session0.query(Professor).all()
-    return render_template('dashboard.html', form=form, professors=professors, students=students)
+    return render_template('dashboard.html', form=form_prof, professors=professors, students=students)
 
 
 @app.route('/edit_professor/<int:professor_id>', methods=['GET', 'POST'])
