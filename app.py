@@ -112,6 +112,13 @@ def load_professors():
     professors = session0.query(Professor).all()
     return professors
 
+# Get professor by ID
+
+def get_professor(professor_id):
+    professor = session0.query(Professor).get(professor_id)
+    return professor
+
+
 # Define the forms for adding
 
 
@@ -127,11 +134,6 @@ class ProfessorForm(FlaskForm):
 
 # Routes and view functions
 
-
-@app.route('/delete_user/<int:user_id>', methods=['POST'])
-def sup_user(user_id):
-    delete(user_id)
-    return redirect('/dashboard')
 
 
 @app.route('/dashboard', methods=['GET', 'POST'])
@@ -149,10 +151,16 @@ def dashboard():
     return render_template('dashboard.html', form_prof=form_prof, professors=professors, students=students)
 
 
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+def sup_user(user_id):
+    delete(user_id)
+    return redirect('/dashboard')
+
+
 @app.route('/edit_professor/<int:professor_id>', methods=['GET', 'POST'])
 def edit_professor(professor_id):
     # Get the professor from the database
-    professor = session0.query(Professor).get(professor_id)
+    professor = get_professor(professor_id)
     if not professor:
         # If the professor is not found, redirect to the dashboard page
         return redirect('/dashboard')
@@ -196,9 +204,7 @@ def edit_professor(professor_id):
     return render_template('edit_prof.html', form=form, professor=professor)
 
 
-@app.route('/success')
-def success():
-    return 'Professor added successfully!'
+
 
 
 @app.route('/home/<int:id_user>')
