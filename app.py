@@ -119,12 +119,38 @@ def get_professor(professor_id):
     return professor
 
 
-# Define the forms for adding
+# Edit professor
+
+def edit_prof(professor, form):
+    username = form.username.data
+    password = form.password.data
+    f_name = form.f_name.data
+    l_name = form.l_name.data
+    degree = form.degree.data
+    specialization = form.specialization.data
+
+    # Update the professor details
+    professor.degree = degree
+    professor.specialization = specialization
+
+    # Find the associated user and update their details
+    user = professor.user
+    user.username = username
+    if password:
+        user.user_password = password
+    user.f_name = f_name
+    user.l_name = l_name
+
+    # Save the changes to the database
+    session0.commit()
+
+
+# --------------------Define the forms------------------------
 
 
 class ProfessorForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password')
     f_name = StringField('First Name', validators=[DataRequired()])
     l_name = StringField('Last Name', validators=[DataRequired()])
     degree = StringField('Degree', validators=[DataRequired()])
@@ -169,26 +195,7 @@ def edit_professor(professor_id):
 
     if form.validate_on_submit():
         # Retrieve data from the form
-        username = form.username.data
-        password = form.password.data
-        f_name = form.f_name.data
-        l_name = form.l_name.data
-        degree = form.degree.data
-        specialization = form.specialization.data
-
-        # Update the professor details
-        professor.degree = degree
-        professor.specialization = specialization
-
-        # Find the associated user and update their details
-        user = professor.user
-        user.username = username
-        user.user_password = password
-        user.f_name = f_name
-        user.l_name = l_name
-
-        # Save the changes to the database
-        session0.commit()
+        edit_prof(professor, form)
 
         return redirect('/dashboard')
 
