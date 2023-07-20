@@ -133,6 +133,13 @@ def get_professor(professor_id):
     professor = session0.query(Professor).get(professor_id)
     return professor
 
+# Get student by ID
+
+
+def get_student(student_id):
+    student = session0.query(Student).get(student_id)
+    return student
+
 
 # Edit professor
 
@@ -159,6 +166,31 @@ def edit_prof(professor, form):
     # Save the changes to the database
     session0.commit()
 
+
+# edit student
+
+
+def edit_stu(student, form):
+    username = form.username.data
+    password = form.password.data
+    f_name = form.f_name.data
+    l_name = form.l_name.data
+    class_id = form.class_id.data
+
+    # Update the professor details
+    student.class_id = class_id
+
+    # Find the associated user and update their details
+    user = student.user
+    user.username = username
+    if password:
+        user.user_password = password
+    user.f_name = f_name
+    user.l_name = l_name
+
+    # Save the changes to the database
+    session0.commit()
+
 # fill the edit professor form with current data
 
 
@@ -172,6 +204,16 @@ def fill_prof_form(professor, form):
     form.professor_id.data = professor.user_id
 
 
+# fill the edit student form with the current data
+
+
+def fill_student_form(student, form):
+    form.username.data = student.user.username
+    form.password.data = student.user.user_password
+    form.f_name.data = student.user.f_name
+    form.l_name.data = student.user.l_name
+    form.class_id.data = student.class_id
+    form.student_id.data = student.user_id
 # Routes and view functions
 
 
@@ -250,6 +292,7 @@ def add_student():
         return redirect('/dashboard')
     return render_template('add_student.html', form=form)
 
+
 @app.route('/edit_professor/<int:professor_id>', methods=['GET', 'POST'])
 def edit_professor(professor_id):
     # Get the professor from the database
@@ -274,22 +317,24 @@ def edit_professor(professor_id):
 @app.route('/edit_student/<int:student_id>', methods=['GET', 'POST'])
 def edit_student(student_id):
     # Get the professor from the database
-    student = get_professor(student_id)
-    if not professor:
-        # If the professor is not found, redirect to the dashboard page
+    student = get_student(student_id)
+    if not student:
+        # If the student is not found, redirect to the dashboard page
         return redirect('/dashboard')
 
-    form = ProfessorForm()
+    form = StudentForm()
+    classes = load_classes()
+    form.class_id.choices = [(c.class_id, c.class_name) for c in classes]
 
     if form.validate_on_submit():
-        # Retrieve data from the form
-        edit_prof(professor, form)
+
+        edit_stu(student, form)
         return redirect('/dashboard')
 
     # Populate the form fields with the professor's current data
-    fill_prof_form(professor, form)
+    fill_student_form(student, form)
 
-    return render_template('edit_prof.html', form=form, professor=professor)
+    return render_template('edit_stu.html', form=form, student=student)
 
 
 @app.route('/home/<int:id_user>')
