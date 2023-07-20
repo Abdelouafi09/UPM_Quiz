@@ -109,7 +109,6 @@ h2{
     <table class="table">
       <thead>
         <tr>
-          <th>ID</th>
           <th>Class Name</th>
           <th>Field</th>
           <th>Level</th>
@@ -119,16 +118,24 @@ h2{
       <tbody>
         <!-- Loop through classes from the database and populate the table -->
         <!-- Example data, replace with dynamic data from the server -->
+        {% for class in classes %}
         <tr>
-          <td>1</td>
-          <td>Mathematics</td>
-          <td>Science</td>
-          <td>10</td>
+          <td>{{class.class_name }}</td>
+          <td>{{ class.class_field }}</td>
+          <td>{{ class.class_level }}</td>
           <td>
-            <button class="btn btn-primary btn-sm edit-class" data-id="1">Edit</button>
-            <button class="btn btn-danger btn-sm delete-class" data-id="1">Delete</button>
+              <form method="POST" action="" style="display:inline;">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button class="btn btn-primary btn-sm edit-user" type="submit">Edit</button>
+              </form>
+
+              <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this professor?')" style="display:inline;">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button class="btn btn-danger btn-sm delete-user" type="submit">Delete</button>
+              </form>
           </td>
         </tr>
+      {% endfor %}
       </tbody>
     </table>
     <!-- Add new class form -->
@@ -173,26 +180,26 @@ h2{
       </thead>
       <tbody>
         {% for student in students %}
-            <tr>
-                <td>{{ student[0] }}</td>
-      <td>{{ student[1] }}</td>
-      <td>{{ student[2] }}</td>
-      <td>{{ student[3] }}</td>
+        <tr>
+            <td>{{ student[0] }}</td>
+            <td>{{ student[1] }}</td>
+            <td>{{ student[2] }}</td>
+            <td>{{ student[3] }}</td>
                 
-                <td>
+            <td>
                    <form method="POST" action="/delete_user/{{ student[4] }}" onsubmit="return confirm('Are you sure you want to delete this Student?')" style="display:inline;">
                         <input type="hidden" name="_method" value="DELETE">
                         <button class="btn btn-danger btn-sm delete-user" type="submit">Delete</button>
                     </form>
-                </td>
-            </tr>
+            </td>
+        </tr>
             {% endfor %}
     
       </tbody>
     </table>
     <!-- Add new subject form -->
 
-    <button class="btn btn-primary" id="show-subject-form">Add Subject</button>
+    <button class="btn btn-primary" id="show-subject-form">Add Student</button>
     <form id="add-subject-form" style="display: none;">
       <div class="form-group">
         <label for="subject-name">Subject Name:</label>

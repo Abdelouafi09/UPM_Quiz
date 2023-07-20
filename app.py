@@ -39,7 +39,7 @@ class User(Base):
     l_name = Column(String(100), nullable=False)
 
     professor = relationship('Professor', uselist=False, backref='user', cascade="all, delete")
-    students = relationship('Student', backref='user', cascade="all, delete")
+    student = relationship('Student', backref='user', cascade="all, delete")
 
 
 class Professor(Base):
@@ -54,28 +54,51 @@ class Student(Base):
     __tablename__ = 'students'
 
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
-    class_id = Column(Integer, ForeignKey('classes.id'), nullable=False)
+    class_id = Column(Integer, ForeignKey('classes.class_id'), nullable=False)
     class_ = relationship('Class', backref='students')
 
 
 class Class(Base):
     __tablename__ = 'classes'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    class_id = Column(Integer, primary_key=True, autoincrement=True)
     class_name = Column(String(255), unique=True, nullable=False)
     class_field = Column(String(255), nullable=False)
     class_level = Column(Integer, nullable=False)
 
+# ------------------------------------Define the forms--------------------------------------
 
+
+class ProfessorForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password')
+    f_name = StringField('First Name', validators=[DataRequired()])
+    l_name = StringField('Last Name', validators=[DataRequired()])
+    degree = StringField('Degree', validators=[DataRequired()])
+    specialization = StringField('Specialization', validators=[DataRequired()])
+    professor_id = HiddenField('Professor ID')
+
+
+class StudentForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password')
+    f_name = StringField('First Name', validators=[DataRequired()])
+    l_name = StringField('Last Name', validators=[DataRequired()])
+    class_name = StringField('Class', validators=[DataRequired()])
+    student_id = HiddenField('Professor ID')
 # -------------------------------------------Define functions-----------------------------------------------------
 
+
 # Delete users (professor, student, admin)
+
+
 def delete(user_id):
     # Find the user by id
     user = session0.query(User).get(user_id)
     # Delete the user from the database
     session0.delete(user)
     session0.commit()
+
 
 # Add professor
 
@@ -106,13 +129,60 @@ def add_professor(form):
         return redirect(
             '/dashboard')  # Redirect to a success page or desired route
 
+# add student
 
+
+def add_student(form):
+    if form.validate_on_submit():
+        # Retrieve data from the form
+        username = form.username.data
+        password = form.password.data
+        f_name = form.f_name.data
+        l_name = form.l_name.data
+        class_id = form.class_id.data
+
+        # Create a new user entry in the 'users' table
+        # and a new professor entry in the 'student' table
+        # Save the changes to the database
+        user = User(username=username,
+                    user_password=password,
+                    user_role='student',
+                    f_name=f_name,
+                    l_name=l_name)
+        student = Student(class_id=class_id)
+        user.student = student
+        session0.add(user)
+        session0.commit()
+
+        return redirect(
+            '/dashboard')
 # Load professors
+
+
 def load_professors():
     professors = session0.query(Professor).all()
     return professors
 
+# load students
+
+
+def load_students():
+    query = select(User.username, User.f_name, User.l_name, Class.class_name, User.user_id).select_from(User). \
+        join(Student).join(Class)
+
+    # Execute the query and fetch the results
+    result = session0.execute(query)
+    students = result.fetchall()
+    return students
+
+
+# load classes
+def load_classes():
+    classes = session0.query(Class).all()
+    return classes
+
 # Get professor by ID
+
 
 def get_professor(professor_id):
     professor = session0.query(Professor).get(professor_id)
@@ -156,21 +226,8 @@ def fill_prof_form(professor, form):
     form.specialization.data = professor.specialization
     form.professor_id.data = professor.user_id
 
-# --------------------Define the forms------------------------
-
-
-class ProfessorForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password')
-    f_name = StringField('First Name', validators=[DataRequired()])
-    l_name = StringField('Last Name', validators=[DataRequired()])
-    degree = StringField('Degree', validators=[DataRequired()])
-    specialization = StringField('Specialization', validators=[DataRequired()])
-    professor_id = HiddenField('Professor ID')
-
 
 # Routes and view functions
-
 
 
 @app.route('/dashboard', methods=['GET', 'POST'])
@@ -178,14 +235,16 @@ def dashboard():
     form_prof = ProfessorForm()
     add_professor(form_prof)
 
-    query = select(User.username, User.f_name, User.l_name, Class.class_name, User.user_id).select_from(User). \
-        join(Student).join(Class)
+    form_stu = StudentForm()
+    add_student(form_stu)
 
-    # Execute the query and fetch the results
-    result = session0.execute(query)
-    students = result.fetchall()
+    students = load_students()
     professors = load_professors()
-    return render_template('dashboard.html', form_prof=form_prof, professors=professors, students=students)
+    classes = load_classes()
+    return render_template('dashboard.html', form_prof=form_prof,
+                           professors=professors,
+                           students=students,
+                           classes=classes)
 
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
@@ -215,7 +274,25 @@ def edit_professor(professor_id):
     return render_template('edit_prof.html', form=form, professor=professor)
 
 
+@app.route('/edit_student/<int:student_id>', methods=['GET', 'POST'])
+def edit_student(student_id):
+    # Get the professor from the database
+    student = get_professor(student_id)
+    if not professor:
+        # If the professor is not found, redirect to the dashboard page
+        return redirect('/dashboard')
 
+    form = ProfessorForm()
+
+    if form.validate_on_submit():
+        # Retrieve data from the form
+        edit_prof(professor, form)
+        return redirect('/dashboard')
+
+    # Populate the form fields with the professor's current data
+    fill_prof_form(professor, form)
+
+    return render_template('edit_prof.html', form=form, professor=professor)
 
 
 @app.route('/home/<int:id_user>')
