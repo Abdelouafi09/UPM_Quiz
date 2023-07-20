@@ -199,56 +199,8 @@ h2{
     </table>
     <!-- Add new subject form -->
 
-    <button class="btn btn-primary" id="show-subject-form">Add Student</button>
-    <form id="add-subject-form" action="{{ url_for('dashboard') }}" style="display: none;" method="POST">
-        {{ form_stu.hidden_tag() }}
-    <p>
-        {{ form_stu.username.label }}<br>
-        {{ form_stu.username(size=20) }}
-        {% for error in form_stu.username.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_stu.password.label }}<br>
-        {{ form_stu.password(size=20) }}
-        {% for error in form_stu.password.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_stu.f_name.label }}<br>
-        {{ form_stu.f_name(size=20) }}
-        {% for error in form_stu.f_name.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_stu.l_name.label }}<br>
-        {{ form_stu.l_name(size=20) }}
-        {% for error in form_stu.l_name.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_stu.class_id.label }}
-        <select name="{{ form_stu.class_id.name }}">
-            {% for value, label in form_stu.class_id.choices %}
-                <option value="{{ value }}">{{ label }}</option>
-            {% endfor %}
-        </select>
-        {% for error in form_prof.degree.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
+    <button class="btn btn-primary" >Add Student</button>
 
-    {% if form_stu.student_id.data %}
-        <input type="hidden" name="student_id" value="{{ form_stu.student_id.data }}">
-    {% endif %}
-    <p>
-        <input type="submit" class="btn btn-success" value="Add Student">
-    </p>
-    </form>
 
 
     
@@ -294,58 +246,13 @@ h2{
     </table>
     <!-- Add new user form -->
 
-    <button class="btn btn-primary" id="show-user-form">Add Professor</button>
-    <form id="add-user-form" style="display: none;" method="POST">
-    {{ form_prof.hidden_tag() }}
-    <p>
-        {{ form_prof.username.label }}<br>
-        {{ form_prof.username(size=20) }}
-        {% for error in form_prof.username.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_prof.password.label }}<br>
-        {{ form_prof.password(size=20) }}
-        {% for error in form_prof.password.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_prof.f_name.label }}<br>
-        {{ form_prof.f_name(size=20) }}
-        {% for error in form_prof.f_name.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_prof.l_name.label }}<br>
-        {{ form_prof.l_name(size=20) }}
-        {% for error in form_prof.l_name.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_prof.degree.label }}<br>
-        {{ form_prof.degree(size=20) }}
-        {% for error in form_prof.degree.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form_prof.specialization.label }}<br>
-        {{ form_prof.specialization(size=20) }}
-        {% for error in form_prof.specialization.errors %}
-            <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    {% if form_prof.professor_id.data %}
-        <input type="hidden" name="professor_id" value="{{ form_prof.professor_id.data }}">
-    {% endif %}
-    <p>
-        <input type="submit" class="btn btn-success" value="Add Professor">
-    </p>
+
+      <form id="add-professor-form" action="{{ url_for('add_professor') }}" method="POST">
+    <!-- Your form fields here -->
+
+    <button type="submit" class="btn btn-success">Add Professor</button>
 </form>
+
 
   </div>
   {% include 'footer.html' %}

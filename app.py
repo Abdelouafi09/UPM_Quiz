@@ -101,35 +101,6 @@ def delete(user_id):
     session0.commit()
 
 
-# Add professor
-
-
-def add_professor(form):
-    if form.validate_on_submit():
-        # Retrieve data from the form
-        username = form.username.data
-        password = form.password.data
-        f_name = form.f_name.data
-        l_name = form.l_name.data
-        degree = form.degree.data
-        specialization = form.specialization.data
-
-        # Create a new user entry in the 'users' table
-        # and a new professor entry in the 'professors' table
-        # Save the changes to the database
-        user = User(username=username,
-                    user_password=password,
-                    user_role='professor',
-                    f_name=f_name,
-                    l_name=l_name)
-        professor = Professor(degree=degree, specialization=specialization)
-        user.professor = professor
-        session0.add(user)
-        session0.commit()
-
-        return redirect(
-            '/dashboard')  # Redirect to a success page or desired route
-
 # add student
 
 
@@ -153,6 +124,7 @@ def add_student(form):
         student = Student(class_id=class_id)
         user.student = student
         session0.add(user)
+        session0.commit()
         session0.commit()
         return redirect('/dashboard')
 
@@ -232,19 +204,10 @@ def fill_prof_form(professor, form):
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-
+    classes = load_classes()
     students = load_students()
     professors = load_professors()
-    classes = load_classes()
-
-    form_prof = ProfessorForm()
-    add_professor(form_prof)
-
-    form_stu = StudentForm()
-    form_stu.class_id.choices = [(c.class_id, c.class_name) for c in classes]
-    add_student(form_stu)
-    return render_template('dashboard.html', form_prof=form_prof,
-                           form_stu=form_stu,
+    return render_template('dashboard.html',
                            professors=professors,
                            students=students,
                            classes=classes)
@@ -255,6 +218,33 @@ def sup_user(user_id):
     delete(user_id)
     return redirect('/dashboard')
 
+@app.route('/add_professor', methods=['POST'])
+def add_professor():
+    form = ProfessorForm()
+    if form.validate_on_submit():
+        # Retrieve data from the form
+        username = form.username.data
+        password = form.password.data
+        f_name = form.f_name.data
+        l_name = form.l_name.data
+        degree = form.degree.data
+        specialization = form.specialization.data
+
+        # Create a new user entry in the 'users' table
+        # and a new professor entry in the 'professors' table
+        # Save the changes to the database
+        user = User(username=username,
+                    user_password=password,
+                    user_role='professor',
+                    f_name=f_name,
+                    l_name=l_name)
+        professor = Professor(degree=degree, specialization=specialization)
+        user.professor = professor
+        session0.add(user)
+        session0.commit()
+        return redirect(
+            '/dashboard')
+    return render_template('add_professor.html', form=form)
 
 @app.route('/edit_professor/<int:professor_id>', methods=['GET', 'POST'])
 def edit_professor(professor_id):

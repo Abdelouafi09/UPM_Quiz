@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html>
+
+
+<form id="add-subject-form" action="{{ url_for('dashboard') }}" style="display: none;" method="POST">
+        {{ form_stu.hidden_tag() }}
+    <p>
+        {{ form_stu.username.label }}<br>
+        {{ form_stu.username(size=20) }}
+        {% for error in form_stu.username.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form_stu.password.label }}<br>
+        {{ form_stu.password(size=20) }}
+        {% for error in form_stu.password.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form_stu.f_name.label }}<br>
+        {{ form_stu.f_name(size=20) }}
+        {% for error in form_stu.f_name.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form_stu.l_name.label }}<br>
+        {{ form_stu.l_name(size=20) }}
+        {% for error in form_stu.l_name.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form_stu.class_id.label }}
+        <select name="{{ form_stu.class_id.name }}">
+            {% for value, label in form_stu.class_id.choices %}
+                <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+        {% for error in form_prof.degree.errors %}
+            <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+
+    {% if form_stu.student_id.data %}
+        <input type="hidden" name="student_id" value="{{ form_stu.student_id.data }}">
+    {% endif %}
+    <p>
+        <input type="submit" class="btn btn-success" value="Add Student">
+    </p>
+    </form>
