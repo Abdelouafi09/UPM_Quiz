@@ -39,7 +39,7 @@ class User(Base):
     l_name = Column(String(100), nullable=False)
 
     professor = relationship('Professor', uselist=False, backref='user', cascade="all, delete")
-    student = relationship('Student', backref='user', cascade="all, delete")
+    student = relationship('Student', uselist=False, backref='user', cascade="all, delete")
 
 
 class Professor(Base):
@@ -55,7 +55,7 @@ class Student(Base):
 
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     class_id = Column(Integer, ForeignKey('classes.class_id'), nullable=False)
-    class_ = relationship('Class', backref='students')
+    class_ = relationship('Class', uselist=False, backref='students')
 
 
 class Class(Base):
@@ -100,33 +100,6 @@ def delete(user_id):
     session0.delete(user)
     session0.commit()
 
-
-# add student
-
-
-def add_student(form):
-    if form.validate_on_submit():
-        # Retrieve data from the form
-        username = form.username.data
-        password = form.password.data
-        f_name = form.f_name.data
-        l_name = form.l_name.data
-        class_id = form.class_id.data
-
-        # Create a new user entry in the 'users' table
-        # and a new professor entry in the 'student' table
-        # Save the changes to the database
-        user = User(username=username,
-                    user_password=password,
-                    user_role='student',
-                    f_name=f_name,
-                    l_name=l_name)
-        student = Student(class_id=class_id)
-        user.student = student
-        session0.add(user)
-        session0.commit()
-        session0.commit()
-        return redirect('/dashboard')
 
 # Load professors
 
@@ -204,7 +177,7 @@ def fill_prof_form(professor, form):
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-    classes = load_classes()
+    classes = session0.query(Class).all()
     students = load_students()
     professors = load_professors()
     return render_template('dashboard.html',
@@ -217,6 +190,7 @@ def dashboard():
 def sup_user(user_id):
     delete(user_id)
     return redirect('/dashboard')
+
 
 @app.route('/add_professor', methods=['POST'])
 def add_professor():
@@ -245,6 +219,36 @@ def add_professor():
         return redirect(
             '/dashboard')
     return render_template('add_professor.html', form=form)
+
+
+@app.route('/add_student', methods=['POST'])
+def add_student():
+    form = StudentForm()
+    classes = load_classes()
+    form.class_id.choices = [(c.class_id, c.class_name) for c in classes]
+    if form.validate_on_submit():
+        # Retrieve data from the form
+        username = form.username.data
+        password = form.password.data
+        f_name = form.f_name.data
+        l_name = form.l_name.data
+        class_id = form.class_id.data
+
+        # Create a new user entry in the 'users' table
+        # and a new professor entry in the 'student' table
+        # Save the changes to the database
+        user = User(username=username,
+                    user_password=password,
+                    user_role='student',
+                    f_name=f_name,
+                    l_name=l_name)
+        student = Student(class_id=class_id)
+        user.student = student
+        session0.add(user)
+        session0.commit()
+        session0.commit()
+        return redirect('/dashboard')
+    return render_template('add_student.html', form=form)
 
 @app.route('/edit_professor/<int:professor_id>', methods=['GET', 'POST'])
 def edit_professor(professor_id):

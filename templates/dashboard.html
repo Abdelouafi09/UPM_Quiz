@@ -42,6 +42,7 @@ h2{
     table {
       background-color: #5b5b5d;
       color: #fff;
+      border-radius: 10px;
     }
 
     th {
@@ -199,7 +200,11 @@ h2{
     </table>
     <!-- Add new subject form -->
 
-    <button class="btn btn-primary" >Add Student</button>
+ <form  action="{{ url_for('add_student') }}" method="POST">
+    <!-- Your form fields here -->
+
+    <button type="submit" class="btn btn-success">Add Student</button>
+</form>
 
 
 
@@ -247,7 +252,7 @@ h2{
     <!-- Add new user form -->
 
 
-      <form id="add-professor-form" action="{{ url_for('add_professor') }}" method="POST">
+      <form action="{{ url_for('add_professor') }}" method="POST">
     <!-- Your form fields here -->
 
     <button type="submit" class="btn btn-success">Add Professor</button>
@@ -257,75 +262,7 @@ h2{
   </div>
   {% include 'footer.html' %}
   <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
 
-
-
-
-
-    
-    $(document).ready(function () {
-      // Show class form
-      $('#show-class-form').click(function () {
-        $('#add-class-form').toggle();
-      });
-
-      // Show subject form
-      $('#show-subject-form').click(function () {
-        $('#add-subject-form').toggle();
-      });
-
-      // Show user form
-      $('#show-user-form').click(function () {
-        $('#add-user-form').toggle();
-      });
-
-      // Add class form submission
-      $('#add-class-form').submit(function (e) {
-        e.preventDefault();
-        // Process form data and send it to the appropriate Flask route
-      });
-
-      // Add subject form submission
-      $('#add-subject-form').submit(function (e) {
-        e.preventDefault();
-        // Process form data and send it to the appropriate Flask route
-      });
-
-
-      // Edit class button click
-      $('.edit-class').click(function () {
-        var classId = $(this).data('id');
-        // Perform necessary actions to edit the class with the given ID
-      });
-
-      // Delete class button click
-      $('.delete-class').click(function () {
-        var classId = $(this).data('id');
-        // Perform necessary actions to delete the class with the given ID
-      });
-
-      // Edit subject button click
-      $('.edit-subject').click(function () {
-        var subjectId = $(this).data('id');
-        // Perform necessary actions to edit the subject with the given ID
-      });
-
-      // Delete subject button click
-      $('.delete-subject').click(function () {
-        var subjectId = $(this).data('id');
-        // Perform necessary actions to delete the subject with the given ID
-      });
-
-      
-
-      // Delete user button click
-      $('.delete-user').click(function () {
-        var userId = $(this).data('id');
-        // Perform necessary actions to delete the user with the given ID
-      });
-    });
-  </script>
 </body>
 
 
