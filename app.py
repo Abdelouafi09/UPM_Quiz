@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, HiddenField
+from wtforms import StringField, PasswordField, SelectField, HiddenField, validators
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
@@ -84,8 +84,9 @@ class StudentForm(FlaskForm):
     password = PasswordField('Password')
     f_name = StringField('First Name', validators=[DataRequired()])
     l_name = StringField('Last Name', validators=[DataRequired()])
-    class_name = StringField('Class', validators=[DataRequired()])
-    student_id = HiddenField('Professor ID')
+    class_id = SelectField('Class', choices=[], coerce=int, validators=[DataRequired()])
+    student_id = HiddenField('Student ID')
+
 # -------------------------------------------Define functions-----------------------------------------------------
 
 
@@ -153,9 +154,8 @@ def add_student(form):
         user.student = student
         session0.add(user)
         session0.commit()
+        return redirect('/dashboard')
 
-        return redirect(
-            '/dashboard')
 # Load professors
 
 
@@ -232,16 +232,19 @@ def fill_prof_form(professor, form):
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-    form_prof = ProfessorForm()
-    add_professor(form_prof)
-
-    form_stu = StudentForm()
-    add_student(form_stu)
 
     students = load_students()
     professors = load_professors()
     classes = load_classes()
+
+    form_prof = ProfessorForm()
+    add_professor(form_prof)
+
+    form_stu = StudentForm()
+    form_stu.class_id.choices = [(c.class_id, c.class_name) for c in classes]
+    add_student(form_stu)
     return render_template('dashboard.html', form_prof=form_prof,
+                           form_stu=form_stu,
                            professors=professors,
                            students=students,
                            classes=classes)
