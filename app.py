@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, redirect, session
-from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, Boolean, Float, Enum, text, select
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, Boolean, Float, Enum, Text, select
 import os
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,14 +27,12 @@ Base = declarative_base()
 
 # --------------------------------------Models-------------------------------------------------------------------
 
-
 class User(Base):
     __tablename__ = 'users'
-
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(255), unique=True, nullable=False)
     user_password = Column(String(255), nullable=False)
-    user_role = Column(Enum('admin', 'student', 'professor'), nullable=False)
+    user_role = Column(Enum('admin', 'student', 'professor', name='user_roles'), nullable=False)
     f_name = Column(String(100), nullable=False)
     l_name = Column(String(100), nullable=False)
 
@@ -44,27 +42,114 @@ class User(Base):
 
 class Professor(Base):
     __tablename__ = 'professors'
-
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     degree = Column(String(255), nullable=False)
     specialization = Column(String(255), nullable=False)
 
+    subjects_taught = relationship('ClassSubject', backref='professor')
+    quizzes_created = relationship('Quiz', backref='creator', uselist=False)
+
 
 class Student(Base):
     __tablename__ = 'students'
-
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     class_id = Column(Integer, ForeignKey('classes.class_id'), nullable=False)
-    class_ = relationship('Class', uselist=False, backref='students')
+
+    class_ = relationship('Class', backref='student')
+    quiz_results = relationship('QuizResult', backref='student')
+    answers_given = relationship('StudentAnswer', backref='student')
 
 
 class Class(Base):
     __tablename__ = 'classes'
-
     class_id = Column(Integer, primary_key=True, autoincrement=True)
     class_name = Column(String(255), unique=True, nullable=False)
     class_field = Column(String(255), nullable=False)
     class_level = Column(Integer, nullable=False)
+
+    students_in = relationship('Student', backref='class')
+    subjects = relationship('ClassSubject', backref='class')
+    quizzes = relationship('ClassQuiz', backref='classes')
+
+
+class Subject(Base):
+    __tablename__ = 'subjects'
+    subject_id = Column(Integer, primary_key=True, autoincrement=True)
+    sub_name = Column(String(255), unique=True, nullable=False)
+
+    classes_profs = relationship('ClassSubject', backref='subject')
+    quizzes = relationship('Quiz', backref='subject')
+
+
+class ClassSubject(Base):
+    __tablename__ = 'class_subjects'
+    class_id = Column(Integer, ForeignKey('classes.class_id'), primary_key=True, nullable=False)
+    subject_id = Column(Integer, ForeignKey('subjects.subject_id'), primary_key=True, nullable=False)
+    professor_id = Column(Integer, ForeignKey('professors.user_id'))
+
+
+class Quiz(Base):
+    __tablename__ = 'quizzes'
+    quiz_id = Column(Integer, primary_key=True, autoincrement=True)
+    quiz_name = Column(String(255), nullable=False)
+    subject_id = Column(Integer, ForeignKey('subjects.subject_id'), nullable=False)
+    prof_id = Column(Integer, ForeignKey('professors.user_id'), nullable=False)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+    duration = Column(Integer, nullable=False)
+    attempts = Column(Integer, nullable=False)
+
+    questions = relationship('Question', backref='quiz')
+    results = relationship('QuizResult', backref='quiz')
+    classes = relationship('ClassQuiz', backref='quizzes')
+
+
+class Question(Base):
+    __tablename__ = 'questions'
+    q_id = Column(Integer, primary_key=True, autoincrement=True)
+    quiz_id = Column(Integer, ForeignKey('quizzes.quiz_id'), nullable=False)
+    q_content = Column(Text, nullable=False)
+
+    options = relationship('Option', backref='question')
+
+    def is_answer_correct(self, selected_option_ids):
+        # Get the correct option IDs for this question
+        correct_option_ids = [option.option_id for option in self.options if option.is_correct]
+
+        # Check if the selected option IDs match the correct option IDs
+        return set(selected_option_ids) == set(correct_option_ids)
+
+
+class Option(Base):
+    __tablename__ = 'options'
+    option_id = Column(Integer, primary_key=True, autoincrement=True)
+    question_id = Column(Integer, ForeignKey('questions.q_id'), nullable=False)
+    o_content = Column(Text, nullable=False)
+    is_correct = Column(Boolean, nullable=False)
+
+
+
+class QuizResult(Base):
+    __tablename__ = 'quiz_results'
+    quiz_id = Column(Integer, ForeignKey('quizzes.quiz_id'), primary_key=True, nullable=False)
+    student_id = Column(Integer, ForeignKey('students.user_id'), primary_key=True, nullable=False)
+    score = Column(Float, nullable=False)
+    attempt = Column(Integer, nullable=False)
+    completed_at = Column(DateTime, nullable=False)
+
+
+class StudentAnswer(Base):
+    __tablename__ = 'student_answers'
+    student_id = Column(Integer, ForeignKey('students.user_id'), primary_key=True, nullable=False)
+    question_id = Column(Integer, ForeignKey('questions.q_id'), primary_key=True, nullable=False)
+    option_id = Column(Integer, ForeignKey('options.option_id'), nullable=False)
+
+
+class ClassQuiz(Base):
+    __tablename__ = 'class_quiz'
+    class_id = Column(Integer, ForeignKey('classes.class_id'), nullable=False, primary_key=True)
+    quiz_id = Column(Integer, ForeignKey('quizzes.quiz_id'), nullable=False, primary_key=True)
+
 
 # ------------------------------------Define the forms--------------------------------------
 
@@ -87,6 +172,7 @@ class StudentForm(FlaskForm):
     class_id = SelectField('Class', choices=[], coerce=int, validators=[DataRequired()])
     student_id = HiddenField('Student ID')
 
+
 # -------------------------------------------Define functions-----------------------------------------------------
 
 
@@ -108,6 +194,7 @@ def load_professors():
     professors = session0.query(Professor).all()
     return professors
 
+
 # load students
 
 
@@ -118,26 +205,32 @@ def load_students():
     # Execute the query and fetch the results
     result = session0.execute(query)
     students = result.fetchall()
+    session0.commit()
     return students
 
 
 # load classes
 def load_classes():
     classes = session0.query(Class).all()
+    session0.commit()
     return classes
+
 
 # Get professor by ID
 
 
 def get_professor(professor_id):
     professor = session0.query(Professor).get(professor_id)
+    session0.commit()
     return professor
+
 
 # Get student by ID
 
 
 def get_student(student_id):
     student = session0.query(Student).get(student_id)
+    session0.commit()
     return student
 
 
@@ -191,6 +284,7 @@ def edit_stu(student, form):
     # Save the changes to the database
     session0.commit()
 
+
 # fill the edit professor form with current data
 
 
@@ -214,9 +308,20 @@ def fill_student_form(student, form):
     form.l_name.data = student.user.l_name
     form.class_id.data = student.class_id
     form.student_id.data = student.user_id
-# Routes and view functions
 
 
+# ----------------------Routes and view functions---------------------------------
+
+
+# Professor's account-----------------------
+
+
+@app.route('/create_quiz/<int:user_id>', methods=['GET', 'POST'])
+def create_quiz_info(user_id):
+    return render_template('create_quiz.html')
+
+
+# Dashboard------------------------------
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     classes = session0.query(Class).all()
@@ -327,7 +432,6 @@ def edit_student(student_id):
     form.class_id.choices = [(c.class_id, c.class_name) for c in classes]
 
     if form.validate_on_submit():
-
         edit_stu(student, form)
         return redirect('/dashboard')
 
@@ -339,8 +443,6 @@ def edit_student(student_id):
 
 @app.route('/home/<int:id_user>')
 def home(id_user):
-    f_name = session.get('first_name')
-    l_name = session.get('last_name')
     user_role = session.get('user_role')
 
     if user_role == 'student':
