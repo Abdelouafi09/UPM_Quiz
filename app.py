@@ -97,9 +97,9 @@ class Quiz(Base):
     subject_id = Column(Integer, ForeignKey('subjects.subject_id'), nullable=False)
     prof_id = Column(Integer, ForeignKey('professors.user_id'), nullable=False)
     start_time = Column(DateTime)
-    end_time = Column(DateTime, nullable=False)
-    duration = Column(Integer, nullable=False)
-    attempts = Column(Integer, nullable=False)
+    end_time = Column(DateTime)
+    duration = Column(Integer)
+    attempts = Column(Integer)
 
     questions = relationship('Question', backref='quiz')
     results = relationship('QuizResult', backref='quiz')
@@ -176,7 +176,7 @@ class StudentForm(FlaskForm):
 
 
 class OptionForm(FlaskForm):
-    o_content = StringField('Option Content', validators=[DataRequired()])
+    o_content = StringField('Option Content')
     is_correct = BooleanField('Is Correct?')
 
 
@@ -188,8 +188,9 @@ class QuestionForm(FlaskForm):
 class QuizForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
-    subject = SelectField('Subject', choices=[], validators=[DataRequired()])
+    subject_id = SelectField('Subject', choices=[], coerce=int, validators=[DataRequired()])
     submit = SubmitField('Next')
+
 # -------------------------------------------Define functions-----------------------------------------------------
 
 
@@ -327,6 +328,16 @@ def fill_student_form(student, form):
     form.student_id.data = student.user_id
 
 
+def load_subject_by_prof(prof_id):
+    class_subjects = session0.query(ClassSubject).filter(ClassSubject.professor_id == prof_id).all()
+
+    # Retrieve the subject_ids from the ClassSubject objects
+    subject_ids = [cs.subject_id for cs in class_subjects]
+
+    # Query the Subject table to get the subject names for the retrieved subject_ids
+    subjects = session0.query(Subject).filter(Subject.subject_id.in_(subject_ids)).all()
+    session0.commit()
+    return subjects
 
 def add_question_to_database(quiz_id, question_content, options_data):
     # Create a new Question instance and add it to the database
@@ -353,8 +364,29 @@ def add_question_to_database(quiz_id, question_content, options_data):
 
 @app.route('/create_quiz/', methods=['GET', 'POST'])
 def create_quiz_info():
-    form
-    return render_template('create_quiz.html')
+    form = QuizForm()
+    prof_id = session['user_id']
+    subjects = load_subject_by_prof(prof_id)
+    form.subject_id.choices = [(s.subject_id, s.sub_name) for s in subjects]
+    if form.validate_on_submit():
+        # Retrieve data from the form
+        title = form.title.data
+        desc = form.description.data
+        subject_id = form.subject_id.data
+
+        # Create a new user entry in the 'users' table
+        # and a new professor entry in the 'student' table
+        # Save the changes to the database
+        quiz = Quiz(quiz_name=title,
+                    description=desc,
+                    subject_id=subject_id,
+                    prof_id=prof_id)
+        session0.add(quiz)
+        session0.commit()
+        quiz_id = quiz.quiz_id
+
+        return redirect('/create_question/' + str(quiz_id))
+    return render_template('create_quiz.html', form=form )
 
 
 @app.route('/create_question/<int:quiz_id>', methods=['GET', 'POST'])
@@ -373,6 +405,7 @@ def create_question(quiz_id):
         # add_question_to_database(question_content, options_data)
         add_question_to_database(quiz_id=quiz_id, question_content=question_content, options_data=options_data)
         # Redirect to a page after successful submission (You can change this URL)
+        redirect('/')
 
     return render_template('question.html', form=form)
 
@@ -389,6 +422,8 @@ def quiz_more_info():
     return render_template('quiz_more_info.html', quiz_info=quiz_info)
 
 # Dashboard------------------------------
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if session['user_role'] != 'admin':
@@ -462,7 +497,7 @@ def add_student():
         user.student = student
         session0.add(user)
         session0.commit()
-        session0.commit()
+
         return redirect('/dashboard')
     return render_template('add_student.html', form=form)
 
