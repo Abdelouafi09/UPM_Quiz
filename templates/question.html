@@ -143,7 +143,19 @@ form button:hover {
 <body>
     {% include 'nav.html' %}
     <div class="content">
-
+    <h1>Create Question</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.q_content.label }} {{ form.q_content() }}
+        <br>
+        {% for option in form.options %}
+            {{ option.o_content.label }} {{ option.o_content() }}
+            {{ option.is_correct() }} {{ option.is_correct.label }}
+            <br>
+        {% endfor %}
+        <button type="submit" name="add_question" value="True">Add Another Question</button>
+        <button type="submit" name="submit_quiz" value="True">Submit Quiz</button>
+    </form>
     </div>
 </body>
 </html>

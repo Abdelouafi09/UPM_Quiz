@@ -6,8 +6,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, HiddenField, validators
-from wtforms.validators import DataRequired
+from wtforms import StringField, PasswordField, SelectField, HiddenField, validators, RadioField, FormField, \
+    SubmitField, FieldList, TextAreaField, BooleanField
+from wtforms.validators import DataRequired, InputRequired
 
 app = Flask(__name__)
 
@@ -92,9 +93,10 @@ class Quiz(Base):
     __tablename__ = 'quizzes'
     quiz_id = Column(Integer, primary_key=True, autoincrement=True)
     quiz_name = Column(String(255), nullable=False)
+    description = Column(String(300))
     subject_id = Column(Integer, ForeignKey('subjects.subject_id'), nullable=False)
     prof_id = Column(Integer, ForeignKey('professors.user_id'), nullable=False)
-    start_time = Column(DateTime, nullable=False)
+    start_time = Column(DateTime)
     end_time = Column(DateTime, nullable=False)
     duration = Column(Integer, nullable=False)
     attempts = Column(Integer, nullable=False)
@@ -173,6 +175,21 @@ class StudentForm(FlaskForm):
     student_id = HiddenField('Student ID')
 
 
+class OptionForm(FlaskForm):
+    o_content = StringField('Option Content', validators=[DataRequired()])
+    is_correct = BooleanField('Is Correct?')
+
+
+class QuestionForm(FlaskForm):
+    q_content = StringField('Question Content', validators=[DataRequired()])
+    options = FieldList(FormField(OptionForm), min_entries=4)
+
+
+class QuizForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    subject = SelectField('Subject', choices=[], validators=[DataRequired()])
+    submit = SubmitField('Next')
 # -------------------------------------------Define functions-----------------------------------------------------
 
 
@@ -310,20 +327,72 @@ def fill_student_form(student, form):
     form.student_id.data = student.user_id
 
 
+
+def add_question_to_database(quiz_id, question_content, options_data):
+    # Create a new Question instance and add it to the database
+    new_question = Question(quiz_id=quiz_id, q_content=question_content)
+    session0.add(new_question)
+    session0.commit()
+
+    # Retrieve the question ID (assuming the primary key is auto-incremented)
+    question_id = new_question.q_id
+
+    # Create Option instances and add them to the database
+    for option_content, is_correct in options_data:
+        new_option = Option(question_id=question_id, o_content=option_content, is_correct=is_correct)
+        session0.add(new_option)
+
+    # Commit the changes to the database
+    session0.commit()
+
 # ----------------------Routes and view functions---------------------------------
 
 
 # Professor's account-----------------------
 
 
-@app.route('/create_quiz/<int:user_id>', methods=['GET', 'POST'])
-def create_quiz_info(user_id):
+@app.route('/create_quiz/', methods=['GET', 'POST'])
+def create_quiz_info():
+    form
     return render_template('create_quiz.html')
 
+
+@app.route('/create_question/<int:quiz_id>', methods=['GET', 'POST'])
+def create_question(quiz_id):
+    form = QuestionForm()
+
+    if form.validate_on_submit():
+        # Get question content from the form
+        question_content = form.q_content.data
+
+        # Get options from the form and filter out the empty ones
+        options_data = [(option.o_content, option.is_correct) for option in form.options if option.o_content]
+
+        # Create the question and its options in the database (You should implement the database part)
+        # Example implementation (assuming you have a function to add the question and options to the database):
+        # add_question_to_database(question_content, options_data)
+        add_question_to_database(quiz_id=quiz_id, question_content=question_content, options_data=options_data)
+        # Redirect to a page after successful submission (You can change this URL)
+
+    return render_template('question.html', form=form)
+
+
+@app.route('/quiz_more_info')
+def quiz_more_info():
+    # You can retrieve and display more information about the quiz here
+    # For example, you can fetch the quiz details from the database and pass them to the template
+    quiz_info = {
+        'quiz_name': 'Sample Quiz',
+        'duration': 60,
+        # Add more details as needed
+    }
+    return render_template('quiz_more_info.html', quiz_info=quiz_info)
 
 # Dashboard------------------------------
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
+    if session['user_role'] != 'admin':
+        return redirect('/home/' + str(session['user_id']))
     classes = session0.query(Class).all()
     students = load_students()
     professors = load_professors()
@@ -441,8 +510,8 @@ def edit_student(student_id):
     return render_template('edit_stu.html', form=form, student=student)
 
 
-@app.route('/home/<int:id_user>')
-def home(id_user):
+@app.route('/home/<int:user_id>')
+def home(user_id):
     user_role = session.get('user_role')
 
     if user_role == 'student':
