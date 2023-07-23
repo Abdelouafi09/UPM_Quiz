@@ -356,6 +356,10 @@ def add_question_to_database(quiz_id, question_content, options_data):
     # Commit the changes to the database
     session0.commit()
 
+
+def get_quiz_by_id(quiz_id):
+    quiz = session0.query(Quiz).get(quiz_id)
+    return quiz
 # ----------------------Routes and view functions---------------------------------
 
 
@@ -412,14 +416,7 @@ def create_question(quiz_id):
 
 @app.route('/quiz_more_info')
 def quiz_more_info():
-    # You can retrieve and display more information about the quiz here
-    # For example, you can fetch the quiz details from the database and pass them to the template
-    quiz_info = {
-        'quiz_name': 'Sample Quiz',
-        'duration': 60,
-        # Add more details as needed
-    }
-    return render_template('quiz_more_info.html', quiz_info=quiz_info)
+    return render_template('quiz_more_info.html')
 
 # Dashboard------------------------------
 
