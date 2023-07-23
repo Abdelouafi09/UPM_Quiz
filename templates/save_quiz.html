@@ -150,11 +150,12 @@ form button:hover {
     <div class="content">
        <h3>{{ quiz.quiz_name }}</h3>
       <hr>
+
     <form action="/save_quiz/{{quiz.quiz_id}}" method="POST">
   <div>
       <h5>Class:</h5>
     {% for class in classes %}
-        <input type="checkbox" value="{{ class.class_id }}" style="margin: 5px 7px 0px 0px;">{{ class.class_name }}</input><br>
+        <input type="checkbox" name="class_id" value="{{ class.class_id }}" style="margin: 5px 7px 0px 0px;">{{ class.class_name }}</input><br>
         {% endfor %}
     </div>
 <br>

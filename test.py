@@ -154,3 +154,42 @@ def create_question(quiz_id):
         return redirect(url_for('create_question', quiz_id=quiz_id))
 
     return render_template('create_question.html', form=form, quiz=quiz, quiz_id=quiz_id)
+
+
+
+
+
+
+
+
+
+@app.route('/save_quiz/<int:quiz_id>')
+def save_quiz(quiz_id):
+    form = QuizInfoForm()
+    quiz = get_quiz_by_id(quiz_id)
+    sub_id = get_quiz_subject(quiz_id)
+    prof_id = session['user_id']
+    classes = get_class_sub_prof(prof_id, sub_id)
+    form.class_id.choices = [(c.class_id, c.class_name) for c in classes]
+    if form.validate_on_submit():
+        # Retrieve data from the form
+        class_ids = form.class_id.data
+        start_time = form.start_time.data
+        attempts = form.attempts.data
+        deadline = form.end_time.data
+        duration = form.duration.data
+
+        # Create a new user entry in the 'users' table
+        # and a new professor entry in the 'student' table
+        # Save the changes to the database
+        quiz = Quiz(start_time=start_time,
+                    end_time=deadline,
+                    duration=duration,
+                    attempts=attempts)
+        quiz.classes = [ClassQuiz(class_id=class_id) for class_id in class_ids]
+
+        session0.add(quiz)
+        session0.commit()
+
+        return redirect('/')
+    return render_template('save_quiz.html', form=form, quiz=quiz)

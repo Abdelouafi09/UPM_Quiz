@@ -340,24 +340,6 @@ def load_subject_by_prof(prof_id):
     return subjects
 
 
-def add_question_to_database(quiz_id, question_content, options_data):
-    # Create a new Question instance and add it to the database
-    new_question = Question(quiz_id=quiz_id, q_content=question_content)
-    session0.add(new_question)
-    session0.commit()
-
-    # Retrieve the question ID (assuming the primary key is auto-incremented)
-    question_id = new_question.q_id
-
-    # Create Option instances and add them to the database
-    for option_content, is_correct in options_data:
-        new_option = Option(question_id=question_id, o_content=option_content, is_correct=is_correct)
-        session0.add(new_option)
-
-    # Commit the changes to the database
-    session0.commit()
-
-
 def get_quiz_by_id(quiz_id):
     quiz = session0.query(Quiz).get(quiz_id)
     return quiz
@@ -429,7 +411,7 @@ def save_question(quiz_id):
     is_correct_4 = request.form.get('is_correct_4') == 'on'
 
     # Create a question instance with the question content
-    question = Question(quiz_id=quiz_id,q_content=q_content)
+    question = Question(quiz_id=quiz_id, q_content=q_content)
 
     # Create option instances with the option content and status
     option_1 = Option(o_content=o_content_1, is_correct=is_correct_1)
@@ -472,9 +454,26 @@ def quiz_more_info(quiz_id):
     classes = get_class_sub_prof(prof_id, sub_id)
     return render_template('save_quiz.html', quiz=quiz, classes=classes)
 
-@app.route('/save_quiz/<int:quiz_id>', methods=['GET', 'POST'])
-def save_quiz(quiz_id):
 
+@app.route('/save_quiz/<int:quiz_id>', methods=['GET', 'POST'])
+
+def save_quiz(quiz_id):
+    class_id = int(request.form.get('class_id'))
+    start_time = request.form['start_time']
+    end_time = request.form['end_time']
+    duration = int(request.form['duration'])
+    attempts = int(request.form['attempts'])
+
+    quiz = get_quiz_by_id(quiz_id)
+    quiz.start_time = start_time
+    quiz.end_time = end_time
+    quiz.duration = duration
+    quiz.attempts = attempts
+
+    class_quiz = ClassQuiz(class_id=class_id, quiz_id=quiz_id)
+    quiz.classes = [class_quiz]
+    session0.add(quiz)
+    session0.commit()
     return redirect('/')
 # Dashboard------------------------------
 
