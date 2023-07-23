@@ -107,24 +107,14 @@
         </div>
         <div class="quiz-list">
             <h2>Quiz List</h2>
+            {% for quiz in quizzes %}
             <div class="quiz-item">
-                <a href="#">
-                    <div class="quiz-title">Quiz 1</div>
-                    <div class="quiz-description">This is the first quiz. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+                <a href="/quiz_prof_info/{{ quiz.quiz_id }}">
+                    <div class="quiz-title">{{quiz.quiz_name}}</div>
+                    <div class="quiz-description">{{quiz.description}}.</div>
                 </a>
             </div>
-            <div class="quiz-item">
-                <a href="#">
-                    <div class="quiz-title">Quiz 2</div>
-                    <div class="quiz-description">This is the second quiz. Pellentesque ac magna at justo sagittis convallis nec ac est.</div>
-                </a>
-            </div>
-            <div class="quiz-item">
-                <a href="#">
-                    <div class="quiz-title">Quiz 3</div>
-                    <div class="quiz-description">This is the third quiz. Aliquam tincidunt nunc ut tristique vehicula.</div>
-                </a>
-            </div>
+            {% endfor %}
         </div>
         <div class="create-quiz-button">
             <a href="/create_quiz">Create New Quiz</a>

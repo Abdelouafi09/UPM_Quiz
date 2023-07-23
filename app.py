@@ -234,6 +234,11 @@ def load_classes():
     return classes
 
 
+#Load professor's quizzes
+
+def load_professor_quizzes(prof_id):
+    quizzes = session0.query(Quiz).filter(Quiz.prof_id == prof_id).all()
+    return quizzes
 # Get professor by ID
 
 
@@ -606,7 +611,8 @@ def home(user_id):
     if user_role == 'student':
         return render_template('st_home.html', session=session)
     elif user_role == 'professor':
-        return render_template('pr_home.html', session=session)
+        quizzes = load_professor_quizzes(user_id)
+        return render_template('pr_home.html', session=session, quizzes=quizzes)
     elif user_role == 'admin':
         return redirect('/dashboard')
     else:
