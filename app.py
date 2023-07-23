@@ -363,6 +363,19 @@ def get_quiz_by_id(quiz_id):
     return quiz
 
 
+def get_class_sub_prof(professor_id,subject_id):
+    class_subjects = session0.query(ClassSubject).filter_by(professor_id=professor_id,subject_id=subject_id)
+    classes_ids = [class_subject.class_id for class_subject in class_subjects]
+    classes = session0.query(Class).filter(Class.class_id.in_(classes_ids)).all()
+    session0.close()
+    return classes
+
+
+def get_quiz_subject(quiz_id):
+    quiz = session0.query(Quiz).get(quiz_id)
+    sub_id = quiz.subject_id
+    session0.close()
+    return sub_id
 # ----------------------Routes and view functions---------------------------------
 
 
@@ -453,9 +466,16 @@ def save_question(quiz_id):
 
 @app.route('/quiz_more_info/<int:quiz_id>')
 def quiz_more_info(quiz_id):
-    return render_template('quiz_more_info.html')
+    quiz = get_quiz_by_id(quiz_id)
+    sub_id = get_quiz_subject(quiz_id)
+    prof_id = session['user_id']
+    classes = get_class_sub_prof(prof_id, sub_id)
+    return render_template('save_quiz.html', quiz=quiz, classes=classes)
 
+@app.route('/save_quiz/<int:quiz_id>', methods=['GET', 'POST'])
+def save_quiz(quiz_id):
 
+    return redirect('/')
 # Dashboard------------------------------
 
 

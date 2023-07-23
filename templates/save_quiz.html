@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Quiz Details</title>
+    <title>Create Quiz</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
-  <style>
-    /* Reset default styles */
+    <style>
+    /* Existing styles... */
+/* Reset default styles */
 body, h1, h2, h3, p, ul, nav, a {
     margin: 0;
     padding: 0;
@@ -15,51 +15,67 @@ body, h1, h2, h3, p, ul, nav, a {
 body {
     font-family: Arial, sans-serif;
     background-color: #212529;
-    color: #fff;
+
 }
+
+header {
+    background-color: #343a40;
+    padding: 20px;
+}
+
+
 .content {
     max-width: 800px;
     margin: 20px auto;
-  border-radius: 10px;
+    border-radius: 10px;
     padding: 20px;
     background-color: #5b5b5d;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-
 .quiz_detail{
   text-align: center;
+  margin-bottom: 10px;
+
 }
 
-    .quiz_detail h4{
-  margin-top: 3rem;
-}
 form label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-}
 
+}
+.content h3{
+  margin-top:3rem;
+  margin-bottom:1rem;
+  color: white;
+}
+form input [type="checkbox"]{
+    margin: 5px 7px 0px 0px;
+}
 form input[type="text"],
 form select,
 form textarea,
 form input[type="datetime-local"],
 form input[type="number"] {
-    width: 100%;
+    width: 98%;
     padding: 10px;
     margin-bottom: 10px;
-  background-color: #c7c7c7;
-    border: 1px solid #ddd;
+    background-color: #c7c7c7;
+    border: 1px solid #ced4da;
     border-radius: 4px;
 }
-
+form ,
+      form label{
+      color: #fff;
+}
 form textarea {
     resize: vertical;
 }
 
 form button {
     padding: 10px 20px;
-    background-color: #212529;
+    background-color: #343a40;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -67,10 +83,8 @@ form button {
 }
 
 form button:hover {
-    background-color: #0056b3;
+    background-color: #212529;
 }
-
-
 
 .question {
     margin-bottom: 20px;
@@ -78,60 +92,96 @@ form button:hover {
 
 .question label {
     font-weight: bold;
+
 }
 
 .question select {
     width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    color: #343a40;
 }
-  </style>
+
+.question .question-type {
+    margin-top: 10px;
+}
+
+.question .question-type label {
+    display: block;
+    margin-right: 10px;
+    color: #fff;
+}
+
+.question .question-type input[type="radio"] {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+    /* Styling the question type input */
+    .question-type label {
+        margin-right: 10px;
+    }
+
+    .question-type input[type="radio"] {
+        display: none;
+    }
+
+    .question-type input[type="radio"] + label {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #ddd;
+        color: #000;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .question-type input[type="radio"]:checked + label {
+        background-color: #212529;
+        color: #fff;
+    }
+</style>
 </head>
 <body>
-    <header>
-      {% include 'nav.html' %}
-    </header>
-    
+
+   {% include 'nav.html' %}
     <div class="content">
-      <div class='quiz_detail'>
-            <h2>More Details</h2>
-            </div>
-        <form action="/quiz/save_details" method="POST">
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" name="subject" required>
-            
-            <label for="class">Class:</label>
-            <input type="text" id="class" name="class" required>
-            
-            <label for="deadline">Deadline:</label>
-            <input type="datetime-local" id="deadline" name="deadline" required>
-            
-            <label for="timer">Quiz Timer (minutes):</label>
-            <input type="number" id="timer" name="timer" min="1" required>
-            <div class='quiz_detail'>
-            <h4>Correcte answers</h4>
-              <hr>
-            </div>
-{% for question in questions %}
-    <div class="question">
-        <h5>Q{{ loop.index }}</h5>
-        <p style='margin: 10px;'>{{ question.text }}</p>
-
-                </select>
-        <label for="answer-{{ loop.index }}">Answer:</label>
-        <select id="answer-{{ loop.index }}" name="answer[]" required>
-            {% for option in question.options %}
-                <option value="{{ option }}">{{ option }}</option>
-            {% endfor %}
-        </select>
+       <h3>{{ quiz.quiz_name }}</h3>
+      <hr>
+    <form action="/save_quiz/{{quiz.quiz_id}}" method="POST">
+  <div>
+      <h5>Class:</h5>
+    {% for class in classes %}
+        <input type="checkbox" value="{{ class.class_id }}" style="margin: 5px 7px 0px 0px;">{{ class.class_name }}</input><br>
+        {% endfor %}
     </div>
-{% endfor %}
-          
-          
-            
-            <button type="submit">Save Quiz</button>
-        </form>
+<br>
+    <div>
+      <label for="start_time">Start Time:</label>
+      <input type="datetime-local" name="start_time" id="start_time" required>
     </div>
 
-    {% include 'footer.html' %}
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <div>
+      <label for="end_time">End Time:</label>
+      <input type="datetime-local" name="end_time" id="end_time" required>
+    </div>
+
+    <div>
+      <label for="duration">Duration (minutes):</label>
+      <input type="number" name="duration" id="duration" required>
+    </div>
+
+    <div>
+      <label for="attempts">Attempts:</label>
+      <input type="number" name="attempts" id="attempts" required>
+    </div>
+
+  <div>
+    <button type="submit">Save quiz</button>
+  </div>
+</form>
+    </div>
 </body>
 </html>
