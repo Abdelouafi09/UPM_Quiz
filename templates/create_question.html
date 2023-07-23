@@ -145,7 +145,7 @@ form button:hover {
     <div class="content">
     <h1>Create Question</h1>
     <p>Quiz: {{ quiz.quiz_name }}</p>
-    <form action="/create_question/{{quiz_id}}" method="POST">
+    <form action="/save_question/{{quiz.quiz_id}}" method="POST">
   <div>
     <label for="q_content">Question:</label>
     <input type="text" id="q_content" name="q_content" required>

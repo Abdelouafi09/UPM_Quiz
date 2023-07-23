@@ -153,4 +153,4 @@ def create_question(quiz_id):
         session0.commit()
         return redirect(url_for('create_question', quiz_id=quiz_id))
 
-    return render_template('question.html', form=form, quiz=quiz, quiz_id=quiz_id)
+    return render_template('create_question.html', form=form, quiz=quiz, quiz_id=quiz_id)

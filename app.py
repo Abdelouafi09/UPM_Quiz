@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, session
+from flask import Flask, request, render_template, redirect, session, url_for
 from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, Boolean, Float, Enum, Text, select
 import os
 from sqlalchemy.orm import sessionmaker, relationship
@@ -130,7 +130,6 @@ class Option(Base):
     is_correct = Column(Boolean, nullable=False)
 
 
-
 class QuizResult(Base):
     __tablename__ = 'quiz_results'
     quiz_id = Column(Integer, ForeignKey('quizzes.quiz_id'), primary_key=True, nullable=False)
@@ -190,6 +189,7 @@ class QuizForm(FlaskForm):
     description = TextAreaField('Description', validators=[DataRequired()])
     subject_id = SelectField('Subject', choices=[], coerce=int, validators=[DataRequired()])
     submit = SubmitField('Next')
+
 
 # -------------------------------------------Define functions-----------------------------------------------------
 
@@ -339,6 +339,7 @@ def load_subject_by_prof(prof_id):
     session0.commit()
     return subjects
 
+
 def add_question_to_database(quiz_id, question_content, options_data):
     # Create a new Question instance and add it to the database
     new_question = Question(quiz_id=quiz_id, q_content=question_content)
@@ -360,6 +361,8 @@ def add_question_to_database(quiz_id, question_content, options_data):
 def get_quiz_by_id(quiz_id):
     quiz = session0.query(Quiz).get(quiz_id)
     return quiz
+
+
 # ----------------------Routes and view functions---------------------------------
 
 
@@ -390,33 +393,68 @@ def create_quiz_info():
         quiz_id = quiz.quiz_id
 
         return redirect('/create_question/' + str(quiz_id))
-    return render_template('create_quiz.html', form=form )
+    return render_template('create_quiz.html', form=form)
 
 
 @app.route('/create_question/<int:quiz_id>', methods=['GET', 'POST'])
 def create_question(quiz_id):
-    form = QuestionForm()
-
-    if form.validate_on_submit():
-        # Get question content from the form
-        question_content = form.q_content.data
-
-        # Get options from the form and filter out the empty ones
-        options_data = [(option.o_content, option.is_correct) for option in form.options if option.o_content]
-
-        # Create the question and its options in the database (You should implement the database part)
-        # Example implementation (assuming you have a function to add the question and options to the database):
-        # add_question_to_database(question_content, options_data)
-        add_question_to_database(quiz_id=quiz_id, question_content=question_content, options_data=options_data)
-        # Redirect to a page after successful submission (You can change this URL)
-        redirect('/')
-
-    return render_template('question.html', form=form)
+    quiz = get_quiz_by_id(quiz_id)
+    return render_template('create_question.html', quiz=quiz)
 
 
-@app.route('/quiz_more_info')
-def quiz_more_info():
+@app.route('/save_question/<int:quiz_id>', methods=['GET', 'POST'])
+def save_question(quiz_id):
+    # Get the form data
+    q_content = request.form.get('q_content')
+    o_content_1 = request.form.get('o_content_1')
+    o_content_2 = request.form.get('o_content_2')
+    o_content_3 = request.form.get('o_content_3')
+    o_content_4 = request.form.get('o_content_4')
+    is_correct_1 = request.form.get('is_correct_1') == 'on'
+    is_correct_2 = request.form.get('is_correct_2') == 'on'
+    is_correct_3 = request.form.get('is_correct_3') == 'on'
+    is_correct_4 = request.form.get('is_correct_4') == 'on'
+
+    # Create a question instance with the question content
+    question = Question(quiz_id=quiz_id,q_content=q_content)
+
+    # Create option instances with the option content and status
+    option_1 = Option(o_content=o_content_1, is_correct=is_correct_1)
+    option_2 = Option(o_content=o_content_2, is_correct=is_correct_2)
+
+    # Associate the options with the question
+    question.options = [option_1, option_2]
+
+    # Check if option 3 is filled
+    if o_content_3:
+        # Create an option instance with the option content and status
+        option_3 = Option(o_content=o_content_3, is_correct=is_correct_3)
+        # Add the option to the question options
+        question.options.append(option_3)
+
+    # Check if option 4 is filled
+    if o_content_4:
+        # Create an option instance with the option content and status
+        option_4 = Option(o_content=o_content_4, is_correct=is_correct_4)
+        # Add the option to the question options
+        question.options.append(option_4)
+
+    # Add the question and the options to the database session
+    session0.add(question)
+    session0.commit()
+    action = request.form.get('action')
+
+    if action == 'add_question':
+        # Call the create_question function
+        return redirect('/create_question/' + str(quiz_id))
+    elif action == 'save_quiz':
+        return redirect('/quiz_more_info/' + str(quiz_id))
+
+
+@app.route('/quiz_more_info/<int:quiz_id>')
+def quiz_more_info(quiz_id):
     return render_template('quiz_more_info.html')
+
 
 # Dashboard------------------------------
 
