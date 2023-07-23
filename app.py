@@ -234,11 +234,27 @@ def load_classes():
     return classes
 
 
-#Load professor's quizzes
+# Load professor's quizzes
 
 def load_professor_quizzes(prof_id):
     quizzes = session0.query(Quiz).filter(Quiz.prof_id == prof_id).all()
     return quizzes
+
+
+# Load student's quizzes
+
+def load_student_quizzes(class_id):
+    class_quizzes = session0.query(ClassQuiz).filter_by(class_id=class_id).all()
+    quiz_ids = [cq.quiz_id for cq in class_quizzes]
+    current_date = datetime.now()
+    if quiz_ids:
+        # Retrieve the quizzes associated with the class using the backref
+        quizzes = session0.query(Quiz).filter(Quiz.quiz_id.in_(quiz_ids), Quiz.end_time > current_date).all()
+
+        return quizzes
+    else:
+        return None
+
 # Get professor by ID
 
 
@@ -350,8 +366,8 @@ def get_quiz_by_id(quiz_id):
     return quiz
 
 
-def get_class_sub_prof(professor_id,subject_id):
-    class_subjects = session0.query(ClassSubject).filter_by(professor_id=professor_id,subject_id=subject_id)
+def get_class_sub_prof(professor_id, subject_id):
+    class_subjects = session0.query(ClassSubject).filter_by(professor_id=professor_id, subject_id=subject_id)
     classes_ids = [class_subject.class_id for class_subject in class_subjects]
     classes = session0.query(Class).filter(Class.class_id.in_(classes_ids)).all()
     session0.close()
@@ -363,6 +379,8 @@ def get_quiz_subject(quiz_id):
     sub_id = quiz.subject_id
     session0.close()
     return sub_id
+
+
 # ----------------------Routes and view functions---------------------------------
 
 
@@ -461,7 +479,6 @@ def quiz_more_info(quiz_id):
 
 
 @app.route('/save_quiz/<int:quiz_id>', methods=['GET', 'POST'])
-
 def save_quiz(quiz_id):
     class_id = int(request.form.get('class_id'))
     start_time = request.form['start_time']
@@ -480,6 +497,8 @@ def save_quiz(quiz_id):
     session0.add(quiz)
     session0.commit()
     return redirect('/')
+
+
 # Dashboard------------------------------
 
 
@@ -609,7 +628,10 @@ def home(user_id):
     user_role = session.get('user_role')
 
     if user_role == 'student':
-        return render_template('st_home.html', session=session)
+        student = session0.query(Student).get(user_id)
+        class_id = student.class_id
+        quizzes = load_student_quizzes(class_id)
+        return render_template('st_home.html', session=session, quizzes=quizzes)
     elif user_role == 'professor':
         quizzes = load_professor_quizzes(user_id)
         return render_template('pr_home.html', session=session, quizzes=quizzes)
