@@ -498,7 +498,13 @@ def save_quiz(quiz_id):
     session0.commit()
     return redirect('/')
 
+@app.route('/quiz_prof_info/<int:quiz_id>', methods=['GET', 'POST'])
+def quiz_prof_info(quiz_id):
+    return render_template('quiz_prof_info.html')
 
+@app.route('/do_quiz/<int:quiz_id>', methods=['GET', 'POST'])
+def do_quiz(quiz_id):
+    return render_template('do_quiz.html')
 # Dashboard------------------------------
 
 
@@ -675,6 +681,7 @@ def login():
 
         # Query the user based on the provided username
         user = session0.query(User).filter_by(username=username).first()
+        session0.close()
 
         # Check if a user was found and if the provided password matches
         if user and password == user.user_password:
