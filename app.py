@@ -116,10 +116,13 @@ class Question(Base):
 
     def is_answer_correct(self, selected_option_ids):
         # Get the correct option IDs for this question
-        correct_option_ids = [option.option_id for option in self.options if option.is_correct]
+        correct_option_ids = {option.option_id for option in self.options if option.is_correct}
+
+        # Convert selected_option_ids to a set for easier comparison
+        selected_option_ids = set(selected_option_ids)
 
         # Check if the selected option IDs match the correct option IDs
-        return set(selected_option_ids) == set(correct_option_ids)
+        return selected_option_ids == correct_option_ids
 
 
 class Option(Base):
@@ -363,6 +366,7 @@ def load_subject_by_prof(prof_id):
 
 def get_quiz_by_id(quiz_id):
     quiz = session0.query(Quiz).get(quiz_id)
+    session0.commit()
     return quiz
 
 
@@ -381,6 +385,113 @@ def get_quiz_subject(quiz_id):
     return sub_id
 
 
+def get_quiz_questions(quiz_id):
+    quiz = session0.query(Quiz).filter_by(quiz_id=quiz_id).first()
+
+    if quiz:
+        # Get the questions associated with the quiz using the backref
+        questions = quiz.questions
+
+        # For each question, get the options associated with it using the backref
+        for question in questions:
+            question.options = question.options
+            session0.commit()
+        return quiz
+    else:
+        return None
+
+
+def calculate_score(quiz, form_data):
+    total_score = 0
+
+    # Loop through the questions in the quiz
+    for question in quiz.questions:
+        # Get the selected option IDs for the current question from the form data
+        selected_options = form_data.getlist(str(question.q_id))
+
+        # Check if all the selected options are correct (using set intersection)
+        is_correct = all(option.is_correct for option in question.options if str(option.option_id) in selected_options)
+
+        # Calculate the score for the question
+        points_per_correct_answer = 1  # Change this based on your scoring system
+        question_score = points_per_correct_answer if is_correct else 0
+
+        # Increment the total score for the quiz
+        total_score += question_score
+
+    return total_score
+
+
+def format_score(quiz_id, score):
+    # Get the quiz by its ID
+    quiz = get_quiz_by_id(quiz_id)
+
+    if quiz:
+        # Get the total number of questions in the quiz
+        total_questions = len(quiz.questions)
+
+        # Calculate the score on a 100-point scale
+        max_score = total_questions  # Each question is worth 1 point
+        score_percent = (score / max_score) * 100
+
+        return score_percent
+
+    else:
+        return None
+
+@app.route('/save_response/<int:quiz_id>', methods=['POST'])
+def save_response(quiz_id):
+    # Get the quiz by its ID
+    quiz = get_quiz_by_id(quiz_id)
+
+    if quiz:
+        # Get the submitted form data
+        form_data = request.form
+
+        # Get the student's ID (you should implement a way to get the student ID, e.g., from the session or
+        # authentication)
+        student_id = session['user_id']  # Replace this with the actual student ID
+
+        # Create a dictionary to store the student's responses
+        student_responses = {}
+
+        # Loop through the questions in the quiz
+        for question in quiz.questions:
+            # Get the selected option IDs for the current question
+            selected_options = form_data.getlist(str(question.q_id))
+
+            # Save the selected options as the student's response for the question
+            student_responses[question.q_id] = selected_options
+
+        # Now, you can calculate the score and save the student's responses and score to the database using the SQLAlchemy models
+
+
+        for question_id, selected_options in student_responses.items():
+            # Retrieve the question by its ID
+            question = session0.query(Question).filter_by(q_id=question_id).first()
+
+
+
+            # Save the student's response to the database
+            for option_id in selected_options:
+                option_id = int(option_id)
+                student_answer = StudentAnswer(student_id=student_id, question_id=question_id, option_id=option_id)
+                session0.add(student_answer)
+
+        # Save the quiz result to the database
+        attempt = 1  # Assuming this is the student's first attempt, you can adjust this based on your requirements
+        completed_at = datetime.now()  # Replace this with the actual completion time
+        score = calculate_score(quiz, form_data)
+        total_score = format_score(quiz_id, score)
+        quiz_result = QuizResult(quiz_id=quiz_id, student_id=student_id, score=total_score, attempt=attempt, completed_at=completed_at)
+        session0.add(quiz_result)
+
+        # Commit the changes to the database
+        session0.commit()
+
+        return "Quiz response saved successfully! Score: {}".format(total_score)
+    else:
+        return "Quiz not found", 404
 # ----------------------Routes and view functions---------------------------------
 
 
@@ -498,13 +609,19 @@ def save_quiz(quiz_id):
     session0.commit()
     return redirect('/')
 
+
 @app.route('/quiz_prof_info/<int:quiz_id>', methods=['GET', 'POST'])
 def quiz_prof_info(quiz_id):
     return render_template('quiz_prof_info.html')
 
+
 @app.route('/do_quiz/<int:quiz_id>', methods=['GET', 'POST'])
 def do_quiz(quiz_id):
-    return render_template('do_quiz.html')
+    quiz = get_quiz_questions(quiz_id)
+    if quiz:
+        return render_template('do_quiz.html', quiz=quiz)
+    else:
+        return "Quiz not found", 404
 # Dashboard------------------------------
 
 
