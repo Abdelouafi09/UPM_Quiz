@@ -439,6 +439,30 @@ def format_score(quiz_id, score):
     else:
         return None
 
+
+def calculate_average_score(student_id, quiz_id):
+    # Get all the quiz attempts made by the student for the given quiz
+    quiz_attempts = session0.query(QuizResult).filter_by(student_id=student_id, quiz_id=quiz_id).all()
+
+    if not quiz_attempts:
+        return 0
+
+    total_attempts = len(quiz_attempts)
+    total_score = 0
+
+    for attempt in quiz_attempts:
+        total_score += attempt.score
+
+    average_score = total_score / total_attempts
+    return average_score
+
+
+def get_students_by_class_ids(class_ids):
+    # Get all students in the specified classes
+    students = session0.query(Student).filter(Student.class_id.in_(class_ids)).all()
+    return students
+
+
 @app.route('/save_response/<int:quiz_id>', methods=['POST'])
 def save_response(quiz_id):
     # Get the quiz by its ID
@@ -468,7 +492,7 @@ def save_response(quiz_id):
 
         for question_id, selected_options in student_responses.items():
             # Retrieve the question by its ID
-            question = session0.query(Question).filter_by(q_id=question_id).first()
+
 
 
 
@@ -610,9 +634,51 @@ def save_quiz(quiz_id):
     return redirect('/')
 
 
-@app.route('/quiz_prof_info/<int:quiz_id>', methods=['GET', 'POST'])
-def quiz_prof_info(quiz_id):
-    return render_template('quiz_prof_info.html')
+@app.route('/quiz_results/<int:quiz_id>')
+def quiz_results(quiz_id):
+    # Get the quiz by its ID
+    quiz = get_quiz_by_id(quiz_id)
+
+    if quiz:
+        # Get the class quizzes for the quiz
+        class_quizzes = session0.query(ClassQuiz).filter_by(quiz_id=quiz_id).all()
+
+        # Get the class IDs from the class quizzes
+        class_ids = [cq.class_id for cq in class_quizzes]
+
+        # Get all students and their classes in the specified classes
+        students_and_classes = session0.query(Student, Class).join(Student.class_).filter(
+            Class.class_id.in_(class_ids)).all()
+
+        # Create a list to store student data with average score
+        student_data = []
+
+        # Calculate and store average score for each student
+        for student, class_info in students_and_classes:
+            student_id = student.user_id
+            scores = []
+
+            # Calculate the scores for the student
+            quiz_results = session0.query(QuizResult).filter_by(quiz_id=quiz_id, student_id=student_id).all()
+            for result in quiz_results:
+                score = format_score(result.quiz_id, result.score)
+                scores.append(score)
+
+            # Calculate average score for the student
+            average_score = calculate_average_score(student.user_id, quiz_id)
+            # Append student info and average score to student_data list
+            student_data.append({
+                'first_name': student.user.f_name,
+                'last_name': student.user.l_name,
+                'class_name': class_info.class_name,
+                'average_score': average_score
+            })
+
+        return render_template('quiz_prof_info.html', quiz=quiz, student_data=student_data)
+
+    else:
+        return "Quiz not found", 404
+
 
 
 @app.route('/do_quiz/<int:quiz_id>', methods=['GET', 'POST'])
