@@ -96,6 +96,10 @@
                 <a href="/do_quiz/{{ quiz.quiz_id }}">
                     <div class="quiz-title">{{quiz.quiz_name}}</div>
                     <div class="quiz-description">{{quiz.description}}.</div>
+                    <hr>
+                    <div class="quiz_info">Destributing time: {{quiz.start_time}}</div>
+                    <div class="quiz_info">Deadline: {{quiz.end_time}}</div>
+                    <div class="quiz_info">Attempts: {{quiz.attempts}}</div>
                 </a>
             </div>
             {% endfor %}

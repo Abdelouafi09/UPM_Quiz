@@ -124,7 +124,7 @@ h2{
                 <td>{{ student_info.first_name }}</td>
                 <td>{{ student_info.last_name }}</td>
                 <td>{{ student_info.class_name }}</td>
-                <td>{{ student_info.average_score }}/100</td>
+                <td>{{ "%.2f"|format(student_info.average_score) }}/100</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, session, url_for
-from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, Boolean, Float, Enum, Text, select
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, String, DateTime, Boolean, Float, Enum, Text, select, \
+    func
 import os
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -442,12 +443,18 @@ def format_score(quiz_id, score):
 
 def calculate_average_score(student_id, quiz_id):
     # Get all the quiz attempts made by the student for the given quiz
-    quiz_attempts = session0.query(QuizResult).filter_by(student_id=student_id, quiz_id=quiz_id).all()
+    total_attempts = session0.query(func.count(QuizResult.attempt)).filter(
+        QuizResult.student_id == student_id,
+        QuizResult.quiz_id == quiz_id
+    ).scalar()
 
-    if not quiz_attempts:
+    if not total_attempts:
         return 0
 
-    total_attempts = len(quiz_attempts)
+    quiz_attempts = session0.query(QuizResult).filter(
+        QuizResult.student_id == student_id,
+        QuizResult.quiz_id == quiz_id
+    ).all()
     total_score = 0
 
     for attempt in quiz_attempts:
@@ -463,59 +470,7 @@ def get_students_by_class_ids(class_ids):
     return students
 
 
-@app.route('/save_response/<int:quiz_id>', methods=['POST'])
-def save_response(quiz_id):
-    # Get the quiz by its ID
-    quiz = get_quiz_by_id(quiz_id)
 
-    if quiz:
-        # Get the submitted form data
-        form_data = request.form
-
-        # Get the student's ID (you should implement a way to get the student ID, e.g., from the session or
-        # authentication)
-        student_id = session['user_id']  # Replace this with the actual student ID
-
-        # Create a dictionary to store the student's responses
-        student_responses = {}
-
-        # Loop through the questions in the quiz
-        for question in quiz.questions:
-            # Get the selected option IDs for the current question
-            selected_options = form_data.getlist(str(question.q_id))
-
-            # Save the selected options as the student's response for the question
-            student_responses[question.q_id] = selected_options
-
-        # Now, you can calculate the score and save the student's responses and score to the database using the SQLAlchemy models
-
-
-        for question_id, selected_options in student_responses.items():
-            # Retrieve the question by its ID
-
-
-
-
-            # Save the student's response to the database
-            for option_id in selected_options:
-                option_id = int(option_id)
-                student_answer = StudentAnswer(student_id=student_id, question_id=question_id, option_id=option_id)
-                session0.add(student_answer)
-
-        # Save the quiz result to the database
-        attempt = 1  # Assuming this is the student's first attempt, you can adjust this based on your requirements
-        completed_at = datetime.now()  # Replace this with the actual completion time
-        score = calculate_score(quiz, form_data)
-        total_score = format_score(quiz_id, score)
-        quiz_result = QuizResult(quiz_id=quiz_id, student_id=student_id, score=total_score, attempt=attempt, completed_at=completed_at)
-        session0.add(quiz_result)
-
-        # Commit the changes to the database
-        session0.commit()
-
-        return "Quiz response saved successfully! Score: {}".format(total_score)
-    else:
-        return "Quiz not found", 404
 # ----------------------Routes and view functions---------------------------------
 
 
@@ -686,6 +641,62 @@ def do_quiz(quiz_id):
     quiz = get_quiz_questions(quiz_id)
     if quiz:
         return render_template('do_quiz.html', quiz=quiz)
+    else:
+        return "Quiz not found", 404
+
+
+
+@app.route('/save_response/<int:quiz_id>', methods=['POST'])
+def save_response(quiz_id):
+    # Get the quiz by its ID
+    quiz = get_quiz_by_id(quiz_id)
+
+    if quiz:
+        # Get the submitted form data
+        form_data = request.form
+
+        # Get the student's ID (you should implement a way to get the student ID, e.g., from the session or
+        # authentication)
+        student_id = session['user_id']  # Replace this with the actual student ID
+
+        # Create a dictionary to store the student's responses
+        student_responses = {}
+
+        # Loop through the questions in the quiz
+        for question in quiz.questions:
+            # Get the selected option IDs for the current question
+            selected_options = form_data.getlist(str(question.q_id))
+
+            # Save the selected options as the student's response for the question
+            student_responses[question.q_id] = selected_options
+
+        # Now, you can calculate the score and save the student's responses and score to the database using the SQLAlchemy models
+
+
+        for question_id, selected_options in student_responses.items():
+            # Retrieve the question by its ID
+
+
+
+
+            # Save the student's response to the database
+            for option_id in selected_options:
+                option_id = int(option_id)
+                student_answer = StudentAnswer(student_id=student_id, question_id=question_id, option_id=option_id)
+                session0.add(student_answer)
+
+        # Save the quiz result to the database
+        attempt = 1  # Assuming this is the student's first attempt, you can adjust this based on your requirements
+        completed_at = datetime.now()  # Replace this with the actual completion time
+        score = calculate_score(quiz, form_data)
+        total_score = format_score(quiz_id, score)
+        quiz_result = QuizResult(quiz_id=quiz_id, student_id=student_id, score=total_score, attempt=attempt, completed_at=completed_at)
+        session0.add(quiz_result)
+
+        # Commit the changes to the database
+        session0.commit()
+
+        return redirect('/')
     else:
         return "Quiz not found", 404
 # Dashboard------------------------------
